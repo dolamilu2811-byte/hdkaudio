@@ -7,6 +7,7 @@ import subprocess
 import webbrowser
 import json
 import urllib.request
+import threading
 
 # Enable UTF-8 console output on Windows
 if sys.platform == "win32":
@@ -54,6 +55,23 @@ def sync_with_render(public_url):
             else:
                 print(f"   [CẢNH BÁO] Chưa đồng bộ được với Render: {e}")
     return False
+
+def start_heartbeat(public_url):
+    def loop():
+        while True:
+            time.sleep(20)
+            try:
+                req = urllib.request.Request(
+                    "https://hdkaudio.onrender.com/api/register-tunnel",
+                    data=json.dumps({"tunnel_url": public_url}).encode("utf-8"),
+                    headers={"Content-Type": "application/json"}
+                )
+                with urllib.request.urlopen(req, timeout=10):
+                    pass
+            except Exception:
+                pass
+    t = threading.Thread(target=loop, daemon=True)
+    t.start()
 
 def main():
     print("\n" + "=" * 70)
@@ -123,8 +141,9 @@ def main():
         time.sleep(1)
     print("   [OK] Tên miền đã kích hoạt xong!                     \n")
 
-    # Register with Render production website
-    sync_with_render(public_url)
+    # Register with Render production website and start perpetual heartbeat
+    if sync_with_render(public_url):
+        start_heartbeat(public_url)
 
     # 5. Success Banner
     copied = copy_to_clipboard("https://hdkaudio.onrender.com")
