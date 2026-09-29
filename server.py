@@ -119,11 +119,7 @@ def get_info():
         'noplaylist': True,
         'socket_timeout': 10,
         'retries': 2,
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['visionos', 'web']
-            }
-        },
+        'remote_components': ['ejs:github'],
         'ffmpeg_location': BIN_DIR if os.path.exists(BIN_DIR) else None,
         'cookiefile': COOKIE_FILE if os.path.exists(COOKIE_FILE) else None,
     }
@@ -223,11 +219,7 @@ def run_download(task_id, url, audio_format, quality, embed_thumb):
         'outtmpl': out_template,
         'progress_hooks': [progress_hook],
         'noplaylist': True,
-        'extractor_args': {
-            'youtube': {
-                'player_client': ['visionos', 'web']
-            }
-        },
+        'remote_components': ['ejs:github'],
         'socket_timeout': 15,
         'ffmpeg_location': BIN_DIR if os.path.exists(BIN_DIR) else None,
         'cookiefile': COOKIE_FILE if os.path.exists(COOKIE_FILE) else None,

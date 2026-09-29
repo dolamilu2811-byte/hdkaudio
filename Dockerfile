@@ -1,8 +1,10 @@
-FROM python:3.12-slim
+﻿FROM python:3.12-slim
 
-# Install ffmpeg and nodejs (required by yt-dlp to solve YouTube JS challenges & n-sig)
+# Install ffmpeg, curl, unzip, ca-certificates, and Deno (required by yt-dlp to solve YouTube JS challenges)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg nodejs && \
+    apt-get install -y --no-install-recommends ffmpeg curl unzip ca-certificates nodejs && \
+    curl -fsSL https://deno.land/install.sh | sh && \
+    mv /root/.deno/bin/deno /usr/local/bin/ && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
