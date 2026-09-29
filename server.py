@@ -100,6 +100,18 @@ def format_seconds(seconds):
 def index():
     return send_from_directory(STATIC_DIR, "index.html")
 
+@app.route("/api/health")
+def health():
+    import shutil
+    return jsonify({
+        "status": "ok",
+        "has_cookie": os.path.exists(COOKIE_FILE),
+        "cookie_size": os.path.getsize(COOKIE_FILE) if os.path.exists(COOKIE_FILE) else 0,
+        "has_deno": shutil.which("deno") is not None,
+        "has_node": shutil.which("node") is not None,
+        "version": "v5.2"
+    })
+
 @app.route("/api/info", methods=["POST"])
 def get_info():
     data = request.get_json() or {}

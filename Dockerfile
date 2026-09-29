@@ -1,10 +1,12 @@
 ﻿FROM python:3.12-slim
 
-# Install ffmpeg, curl, unzip, ca-certificates, and Deno (required by yt-dlp to solve YouTube JS challenges)
+# Install ffmpeg, curl, unzip, ca-certificates, and Deno
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg curl unzip ca-certificates nodejs && \
-    curl -fsSL https://deno.land/install.sh | sh && \
-    mv /root/.deno/bin/deno /usr/local/bin/ && \
+    apt-get install -y --no-install-recommends ffmpeg curl unzip ca-certificates && \
+    curl -fsSL -o /tmp/deno.zip https://github.com/denoland/deno/releases/latest/download/deno-x86_64-unknown-linux-gnu.zip && \
+    unzip /tmp/deno.zip -d /usr/local/bin && \
+    chmod +x /usr/local/bin/deno && \
+    rm -f /tmp/deno.zip && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
