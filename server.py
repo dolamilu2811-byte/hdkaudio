@@ -25,7 +25,7 @@ app = Flask(__name__, static_folder="static", static_url_path="/static")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BIN_DIR = os.path.join(BASE_DIR, "bin")
 TEMP_CACHE_DIR = os.path.join(BASE_DIR, "temp_downloads")
-STATIC_DIR = os.path.join(BASE_DIR, "static")
+STATIC_DIR = os.path.join(BASE_DIR, "static")\nCOOKIE_FILE = os.path.join(BASE_DIR, "cookies.txt")
 
 os.makedirs(TEMP_CACHE_DIR, exist_ok=True)
 os.makedirs(STATIC_DIR, exist_ok=True)
@@ -123,7 +123,7 @@ def get_info():
                 'player_client': ['android', 'ios']
             }
         },
-        'ffmpeg_location': BIN_DIR if os.path.exists(BIN_DIR) else None,
+        'ffmpeg_location': BIN_DIR if os.path.exists(BIN_DIR) else None,\n        'cookiefile': COOKIE_FILE if os.path.exists(COOKIE_FILE) else None,
     }
 
     try:
@@ -227,7 +227,7 @@ def run_download(task_id, url, audio_format, quality, embed_thumb):
             }
         },
         'socket_timeout': 15,
-        'ffmpeg_location': BIN_DIR if os.path.exists(BIN_DIR) else None,
+        'ffmpeg_location': BIN_DIR if os.path.exists(BIN_DIR) else None,\n        'cookiefile': COOKIE_FILE if os.path.exists(COOKIE_FILE) else None,
         'postprocessors': postprocessors,
         'writethumbnail': embed_thumb,
         'quiet': True,
