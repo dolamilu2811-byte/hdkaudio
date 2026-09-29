@@ -100,15 +100,31 @@ def main():
         print(f"   Sẵn sàng sau: {i}s...", end="\\r", flush=True)
         time.sleep(1)
     print("   ✅ Tên miền đã kích hoạt xong!                     \n")
+    # Register with Render production website
+    print("📡 Đang đồng bộ với website chính https://hdkaudio.onrender.com...")
+    try:
+        reg_req = urllib.request.Request(
+            "https://hdkaudio.onrender.com/api/register-tunnel",
+            data=json.dumps({"tunnel_url": public_url}).encode("utf-8"),
+            headers={"Content-Type": "application/json"}
+        )
+        with urllib.request.urlopen(reg_req, timeout=10) as r_resp:
+            print("   ✅ Đã kết nối thành công với https://hdkaudio.onrender.com!")
+    except Exception as e_reg:
+        print(f"   ⚠️ Chưa đồng bộ được với Render: {e_reg}")
+
 
     # 5. Success Banner
     copied = copy_to_clipboard(public_url)
 
     print("=" * 70)
-    print("      🎉 ĐÃ KÍCH HOẠT LINK THÀNH CÔNG! BẤT KỲ AI CŨNG VÀO ĐƯỢC 🎉")
+    print("      🎉 TRANG WEB CHÍNH THỨC CỦA BẠN (CỐ ĐỊNH, DỄ NHỚ) 🎉")
     print("=" * 70)
-    print(f"\n🌐 ĐƯỜNG LINK CỦA BẠN:")
-    print(f"   👉  {public_url}\n")
+    print("\n🌐 BẠN CHỈ CẦN VÀO LINK NÀY TRÊN ĐIỆN THOẠI HOẶC GỬI CHO BẠN BÈ:")
+    print("   👉👉👉  https://hdkaudio.onrender.com  👈👈👈\n")
+    print("=" * 70)
+    print("   ✅ TẤT CẢ VIDEO DÀI, MIX, PLAYLIST ĐỀU SẼ TẢI SIÊU TỐC TẠI LINK TRÊN!")
+    print("=" * 70)
     if copied:
         print("📋 [ĐÃ TỰ ĐỘNG COPY LINK VÀO BỘ NHỚ TẠM - CLIPBOARD]")
         print("   Bạn chỉ cần bấm Ctrl + V để gửi link này cho bạn bè qua Zalo, Messenger")

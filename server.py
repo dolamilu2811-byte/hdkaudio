@@ -100,6 +100,27 @@ def format_seconds(seconds):
 def index():
     return send_from_directory(STATIC_DIR, "index.html")
 
+
+ACTIVE_TUNNEL_URL = None
+
+@app.route("/api/register-tunnel", methods=["POST"])
+def register_tunnel():
+    global ACTIVE_TUNNEL_URL
+    data = request.get_json() or {}
+    url = data.get("tunnel_url", "").strip().rstrip("/")
+    if url:
+        ACTIVE_TUNNEL_URL = url
+        print(f"[TUNNEL] Da ket noi voi Residential Bridge: {ACTIVE_TUNNEL_URL}", flush=True)
+        return jsonify({"status": "connected", "tunnel_url": ACTIVE_TUNNEL_URL})
+    return jsonify({"error": "No URL provided"}), 400
+
+@app.route("/api/tunnel-status")
+def tunnel_status():
+    return jsonify({
+        "active_tunnel": ACTIVE_TUNNEL_URL,
+        "is_connected": ACTIVE_TUNNEL_URL is not None
+    })
+
 @app.route("/api/health")
 def health():
     import shutil
@@ -144,37 +165,50 @@ def get_info():
         try:
             info = do_extract(use_cookie=False)
         except Exception as e_clean:
+            if ACTIVE_TUNNEL_URL:
+                try:
+                    import urllib.request
+                    proxy_req = urllib.request.Request(
+                        f"{ACTIVE_TUNNEL_URL}/api/info",
+                        data=json.dumps({"url": url}).encode("utf-8"),
+                        headers={"Content-Type": "application/json"}
+                    )
+                    with urllib.request.urlopen(proxy_req, timeout=25) as p_resp:
+                        return Response(p_resp.read(), status=p_resp.status, mimetype="application/json")
+                except Exception as e_proxy:
+                    print(f"[TUNNEL PROXY INFO ERROR]: {e_proxy}", flush=True)
             if os.path.exists(COOKIE_FILE):
                 info = do_extract(use_cookie=True)
             else:
                 raise e_clean
-            if not info:
-                return jsonify({"error": "Không thể lấy thông tin từ video này."}), 400
 
-            if 'entries' in info and info['entries']:
-                entry = info['entries'][0]
-            else:
-                entry = info
+        if not info:
+            return jsonify({"error": "Không thể lấy thông tin từ video này."}), 400
 
-            title = entry.get('title', 'Unknown Title')
-            duration = entry.get('duration', 0)
-            uploader = entry.get('uploader') or entry.get('channel') or 'YouTube'
-            thumbnail = entry.get('thumbnail') or ''
-            view_count = entry.get('view_count', 0)
+        if 'entries' in info and info['entries']:
+            entry = info['entries'][0]
+        else:
+            entry = info
 
-            elapsed = round(time.time() - t0, 2)
-            print(f"[{datetime.now().strftime('%H:%M:%S')}] <-- Phân tích thành công trong {elapsed}s: {title}", flush=True)
+        title = entry.get('title', 'Unknown Title')
+        duration = entry.get('duration', 0)
+        uploader = entry.get('uploader') or entry.get('channel') or 'YouTube'
+        thumbnail = entry.get('thumbnail') or ''
+        view_count = entry.get('view_count', 0)
 
-            return jsonify({
-                "title": title,
-                "duration": duration,
-                "duration_str": format_seconds(duration),
-                "uploader": uploader,
-                "thumbnail": thumbnail,
-                "view_count": f"{view_count:,}" if view_count else "N/A",
-                "url": url,
-                "elapsed": elapsed
-            })
+        elapsed = round(time.time() - t0, 2)
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] <-- Phân tích thành công trong {elapsed}s: {title}", flush=True)
+
+        return jsonify({
+            "title": title,
+            "duration": duration,
+            "duration_str": format_seconds(duration),
+            "uploader": uploader,
+            "thumbnail": thumbnail,
+            "view_count": f"{view_count:,}" if view_count else "N/A",
+            "url": url,
+            "elapsed": elapsed
+        })
     except Exception as e:
         err_str = str(e)
         print(f"[{datetime.now().strftime('%H:%M:%S')}] <-- Lỗi phân tích link: {err_str}", flush=True)
@@ -258,6 +292,7 @@ def run_download(task_id, url, audio_format, quality, embed_thumb):
             "percent": 5.0
         })
 
+        info = None
         try:
             opts_clean = dict(ydl_opts)
             opts_clean['cookiefile'] = None
@@ -271,10 +306,11 @@ def run_download(task_id, url, audio_format, quality, embed_thumb):
                     info = ydl.extract_info(url, download=True)
             else:
                 raise e_clean
-            if 'entries' in info and info['entries']:
-                entry = info['entries'][0]
-            else:
-                entry = info
+
+        if 'entries' in info and info['entries']:
+            entry = info['entries'][0]
+        else:
+            entry = info
 
             matching_files = glob.glob(os.path.join(TEMP_CACHE_DIR, f"*.{audio_format}"))
             if matching_files:
@@ -330,6 +366,29 @@ def start_download():
         "created_at": time.time()
     }
 
+    if ACTIVE_TUNNEL_URL:
+        try:
+            import urllib.request
+            proxy_req = urllib.request.Request(
+                f"{ACTIVE_TUNNEL_URL}/api/download",
+                data=json.dumps({
+                    "url": url,
+                    "format": audio_format,
+                    "quality": quality,
+                    "embed_thumbnail": embed_thumb
+                }).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(proxy_req, timeout=15) as p_resp:
+                remote_data = json.loads(p_resp.read().decode("utf-8"))
+                remote_task_id = remote_data.get("task_id")
+                if remote_task_id:
+                    TASKS[task_id]["remote_task_id"] = remote_task_id
+                    TASKS[task_id]["is_proxied"] = True
+                    return jsonify({"task_id": task_id})
+        except Exception as e_dl_proxy:
+            print(f"[TUNNEL PROXY DL ERROR]: {e_dl_proxy}", flush=True)
+
     thread = threading.Thread(target=run_download, args=(task_id, url, audio_format, quality, embed_thumb))
     thread.daemon = True
     thread.start()
@@ -341,6 +400,21 @@ def get_progress(task_id):
     task = TASKS.get(task_id)
     if not task:
         return jsonify({"error": "Task not found"}), 404
+
+    if task.get("is_proxied") and ACTIVE_TUNNEL_URL:
+        remote_id = task.get("remote_task_id")
+        try:
+            import urllib.request
+            with urllib.request.urlopen(f"{ACTIVE_TUNNEL_URL}/api/progress/{remote_id}", timeout=10) as p_resp:
+                p_data = json.loads(p_resp.read().decode("utf-8"))
+                filename = p_data.get("filename")
+                if filename:
+                    p_data["file_url"] = f"/api/download-file/{filename}"
+                    p_data["stream_url"] = f"/api/stream/{filename}"
+                return jsonify(p_data)
+        except Exception as e:
+            print(f"[TUNNEL PROGRESS ERROR]: {e}", flush=True)
+
     return jsonify(task)
 
 @app.route("/api/stream/<path:filename>")
@@ -361,6 +435,29 @@ def stream_file(filename):
 
 @app.route("/api/download-file/<path:filename>")
 def download_file(filename):
+    file_path = os.path.join(TEMP_CACHE_DIR, filename)
+    if not os.path.exists(file_path) and ACTIVE_TUNNEL_URL:
+        import urllib.request
+        from urllib.parse import quote
+        safe_fn = quote(filename)
+        remote_url = f"{ACTIVE_TUNNEL_URL}/api/download-file/{safe_fn}"
+        try:
+            req = urllib.request.Request(remote_url)
+            remote_file = urllib.request.urlopen(req, timeout=60)
+            def generate():
+                while True:
+                    chunk = remote_file.read(64 * 1024)
+                    if not chunk:
+                        break
+                    yield chunk
+            headers = {
+                "Content-Disposition": f'attachment; filename="{safe_fn}"',
+                "Content-Type": remote_file.headers.get("Content-Type", "application/octet-stream")
+            }
+            return Response(generate(), headers=headers)
+        except Exception as e:
+            print(f"[TUNNEL FILE ERROR]: {e}", flush=True)
+
     return send_from_directory(TEMP_CACHE_DIR, filename, as_attachment=True)
 
 if __name__ == "__main__":
