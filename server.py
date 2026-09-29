@@ -124,21 +124,30 @@ def get_info():
     print(f"[{timestamp}] --> Yêu cầu phân tích link: {url}", flush=True)
 
     t0 = time.time()
-    ydl_opts = {
-        'quiet': True,
-        'no_warnings': True,
-        'skip_download': True,
-        'noplaylist': True,
-        'socket_timeout': 10,
-        'retries': 2,
-        'remote_components': ['ejs:github'],
-        'ffmpeg_location': BIN_DIR if os.path.exists(BIN_DIR) else None,
-        'cookiefile': COOKIE_FILE if os.path.exists(COOKIE_FILE) else None,
-    }
+    def do_extract(use_cookie=False):
+        opts = {
+            'quiet': True,
+            'no_warnings': True,
+            'skip_download': True,
+            'noplaylist': True,
+            'socket_timeout': 15,
+            'retries': 2,
+            'ffmpeg_location': BIN_DIR if os.path.exists(BIN_DIR) else None,
+        }
+        if use_cookie and os.path.exists(COOKIE_FILE):
+            opts['cookiefile'] = COOKIE_FILE
+            opts['remote_components'] = ['ejs:github']
+        with yt_dlp.YoutubeDL(opts) as ydl:
+            return ydl.extract_info(url, download=False)
 
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=False)
+        try:
+            info = do_extract(use_cookie=False)
+        except Exception as e_clean:
+            if os.path.exists(COOKIE_FILE):
+                info = do_extract(use_cookie=True)
+            else:
+                raise e_clean
             if not info:
                 return jsonify({"error": "Không thể lấy thông tin từ video này."}), 400
 
@@ -249,8 +258,19 @@ def run_download(task_id, url, audio_format, quality, embed_thumb):
             "percent": 5.0
         })
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
+        try:
+            opts_clean = dict(ydl_opts)
+            opts_clean['cookiefile'] = None
+            with yt_dlp.YoutubeDL(opts_clean) as ydl:
+                info = ydl.extract_info(url, download=True)
+        except Exception as e_clean:
+            if COOKIE_FILE and os.path.exists(COOKIE_FILE):
+                opts_cookie = dict(ydl_opts)
+                opts_cookie['cookiefile'] = COOKIE_FILE
+                with yt_dlp.YoutubeDL(opts_cookie) as ydl:
+                    info = ydl.extract_info(url, download=True)
+            else:
+                raise e_clean
             if 'entries' in info and info['entries']:
                 entry = info['entries'][0]
             else:
