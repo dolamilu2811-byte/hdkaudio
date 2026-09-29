@@ -120,7 +120,7 @@ def get_info():
         'retries': 2,
         'extractor_args': {
             'youtube': {
-                'player_client': ['web', 'android']
+                'player_client': ['android', 'ios']
             }
         },
         'ffmpeg_location': BIN_DIR if os.path.exists(BIN_DIR) else None,
@@ -221,6 +221,11 @@ def run_download(task_id, url, audio_format, quality, embed_thumb):
         'outtmpl': out_template,
         'progress_hooks': [progress_hook],
         'noplaylist': True,
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['android', 'ios']
+            }
+        },
         'socket_timeout': 15,
         'ffmpeg_location': BIN_DIR if os.path.exists(BIN_DIR) else None,
         'postprocessors': postprocessors,
