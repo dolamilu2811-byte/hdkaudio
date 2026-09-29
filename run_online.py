@@ -5,6 +5,8 @@ import time
 import socket
 import subprocess
 import webbrowser
+import json
+import urllib.request
 
 # Enable UTF-8 console output on Windows
 if sys.platform == "win32":
@@ -33,9 +35,29 @@ def copy_to_clipboard(text):
     except Exception:
         return False
 
+def sync_with_render(public_url):
+    print("\n[*] Đang đồng bộ với website chính https://hdkaudio.onrender.com...")
+    for attempt in range(1, 4):
+        try:
+            req = urllib.request.Request(
+                "https://hdkaudio.onrender.com/api/register-tunnel",
+                data=json.dumps({"tunnel_url": public_url}).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                if resp.status == 200:
+                    print("   [OK] ĐÃ KẾT NỐI THÀNH CÔNG VỚI https://hdkaudio.onrender.com!")
+                    return True
+        except Exception as e:
+            if attempt < 3:
+                time.sleep(2)
+            else:
+                print(f"   [CẢNH BÁO] Chưa đồng bộ được với Render: {e}")
+    return False
+
 def main():
     print("\n" + "=" * 70)
-    print("      🎵 HDK AUDIO - KHỞI ĐỘNG CHIA SẺ TRỰC TUYẾN TOÀN CẦU 🎵")
+    print("      HDK AUDIO - KHỞI ĐỘNG CHIA SẺ TRỰC TUYẾN TOÀN CẦU")
     print("=" * 70)
 
     # 1. Check or start Server
@@ -93,35 +115,25 @@ def main():
             pass
         return
 
-    # Warm-up delay for global DNS propagation (prevent NXDOMAIN)
-    print(f"\n[3/3] Đã tạo đường link: {public_url}")
-    print("⏳ Đang kích hoạt tên miền trên hệ thống DNS toàn cầu...")
-    for i in range(5, 0, -1):
-        print(f"   Sẵn sàng sau: {i}s...", end="\\r", flush=True)
+    # Warm-up delay for global DNS propagation
+    print(f"\n[3/3] Đã tạo đường link kết nối: {public_url}")
+    print("[*] Đang kích hoạt tên miền trên hệ thống DNS toàn cầu...")
+    for i in range(4, 0, -1):
+        print(f"   Sẵn sàng sau: {i}s...", end="\r", flush=True)
         time.sleep(1)
-    print("   ✅ Tên miền đã kích hoạt xong!                     \n")
-    # Register with Render production website
-    print("📡 Đang đồng bộ với website chính https://hdkaudio.onrender.com...")
-    try:
-        reg_req = urllib.request.Request(
-            "https://hdkaudio.onrender.com/api/register-tunnel",
-            data=json.dumps({"tunnel_url": public_url}).encode("utf-8"),
-            headers={"Content-Type": "application/json"}
-        )
-        with urllib.request.urlopen(reg_req, timeout=10) as r_resp:
-            print("   ✅ Đã kết nối thành công với https://hdkaudio.onrender.com!")
-    except Exception as e_reg:
-        print(f"   ⚠️ Chưa đồng bộ được với Render: {e_reg}")
+    print("   [OK] Tên miền đã kích hoạt xong!                     \n")
 
+    # Register with Render production website
+    sync_with_render(public_url)
 
     # 5. Success Banner
-    copied = copy_to_clipboard(public_url)
+    copied = copy_to_clipboard("https://hdkaudio.onrender.com")
 
+    print("\n" + "=" * 70)
+    print("      TRANG WEB CHÍNH THỨC CỦA BẠN (CỐ ĐỊNH, DỄ NHỚ)")
     print("=" * 70)
-    print("      🎉 TRANG WEB CHÍNH THỨC CỦA BẠN (CỐ ĐỊNH, DỄ NHỚ) 🎉")
-    print("=" * 70)
-    print("\n🌐 BẠN CHỈ CẦN VÀO LINK NÀY TRÊN ĐIỆN THOẠI HOẶC GỬI CHO BẠN BÈ:")
-    print("   👉👉👉  https://hdkaudio.onrender.com  👈👈👈\n")
+    print("\n👉 BẠN CHỈ CẦN VÀO LINK NÀY TRÊN ĐIỆN THOẠI HOẶC GỬI CHO BẠN BÈ:")
+    print("   ⭐⭐⭐  https://hdkaudio.onrender.com  ⭐⭐⭐\n")
     print("=" * 70)
     print("   ✅ TẤT CẢ VIDEO DÀI, MIX, PLAYLIST ĐỀU SẼ TẢI SIÊU TỐC TẠI LINK TRÊN!")
     print("=" * 70)
@@ -130,13 +142,13 @@ def main():
         print("   Bạn chỉ cần bấm Ctrl + V để gửi link này cho bạn bè qua Zalo, Messenger")
         print("   hoặc mở trên điện thoại để tải nhạc ngay lập tức!\n")
     print("=" * 70)
-    print("💡 LƯU Ý: Giữ cửa sổ này mở để link tiếp tục hoạt động.")
-    print("   Nhấn Ctrl + C để dừng chia sẻ bất kỳ lúc nào.")
+    print("📌 LƯU Ý: Giữ cửa sổ này mở để link tiếp tục hoạt động.")
+    print("   Nhấn Ctrl + C để dừng bất kỳ lúc nào.")
     print("=" * 70 + "\n")
 
-    # Open browser with public URL
+    # Open browser with hdkaudio.onrender.com
     try:
-        webbrowser.open(public_url)
+        webbrowser.open("https://hdkaudio.onrender.com")
     except Exception:
         pass
 

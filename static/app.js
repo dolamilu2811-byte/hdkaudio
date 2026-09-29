@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000);
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
 
     try {
       const res = await fetch('/api/info', {
@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } catch (err) {
       if (err.name === 'AbortError') {
-        showNotification('Quá thời gian kết nối YouTube (25s). Bạn vui lòng bấm "Phân tích" lại một lần nữa!');
+        showNotification('Quá thời gian kết nối YouTube (45s). Bạn vui lòng bấm "Phân tích" lại một lần nữa!');
       } else {
         showNotification(err.message || 'Lỗi khi kết nối tới máy chủ.');
       }
@@ -428,6 +428,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  
+  // Check tunnel connection status
+  async function checkTunnelStatus() {
+    try {
+      const res = await fetch('/api/tunnel-status');
+      const data = await res.json();
+      const badge = document.getElementById('systemStatusBadge');
+      if (badge) {
+        if (data.is_connected) {
+          badge.innerHTML = '<span class="dot" style="background:#10b981;box-shadow:0 0 10px #10b981;"></span> Siêu Tốc (PC Đã Kết Nối)';
+          badge.title = 'Đang kết nối qua máy tính cá nhân - Tải được 100% video dài, mix, playlist không bị chặn!';
+        } else {
+          badge.innerHTML = '<span class="dot"></span> Online 24/7 (Đám mây)';
+        }
+      }
+    } catch (e) {}
+  }
+  checkTunnelStatus();
+  setInterval(checkTunnelStatus, 10000);
+
   // Initial load
   renderSessionHistory();
+
 });

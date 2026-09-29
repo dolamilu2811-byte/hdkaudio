@@ -161,22 +161,24 @@ def get_info():
         with yt_dlp.YoutubeDL(opts) as ydl:
             return ydl.extract_info(url, download=False)
 
+    # 1. Neu co Residential Tunnel, proxy ngay lap tuc de tra ket qua trong 1s va tranh bot block
+    if ACTIVE_TUNNEL_URL:
+        try:
+            import urllib.request
+            proxy_req = urllib.request.Request(
+                f"{ACTIVE_TUNNEL_URL}/api/info",
+                data=json.dumps({"url": url}).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(proxy_req, timeout=20) as p_resp:
+                return Response(p_resp.read(), status=p_resp.status, mimetype="application/json")
+        except Exception as e_proxy:
+            print(f"[TUNNEL PROXY INFO ERROR, chuyen sang che do fallback]: {e_proxy}", flush=True)
+
     try:
         try:
             info = do_extract(use_cookie=False)
         except Exception as e_clean:
-            if ACTIVE_TUNNEL_URL:
-                try:
-                    import urllib.request
-                    proxy_req = urllib.request.Request(
-                        f"{ACTIVE_TUNNEL_URL}/api/info",
-                        data=json.dumps({"url": url}).encode("utf-8"),
-                        headers={"Content-Type": "application/json"}
-                    )
-                    with urllib.request.urlopen(proxy_req, timeout=25) as p_resp:
-                        return Response(p_resp.read(), status=p_resp.status, mimetype="application/json")
-                except Exception as e_proxy:
-                    print(f"[TUNNEL PROXY INFO ERROR]: {e_proxy}", flush=True)
             if os.path.exists(COOKIE_FILE):
                 info = do_extract(use_cookie=True)
             else:
@@ -420,6 +422,27 @@ def get_progress(task_id):
 @app.route("/api/stream/<path:filename>")
 def stream_file(filename):
     file_path = os.path.join(TEMP_CACHE_DIR, filename)
+    if not os.path.exists(file_path) and ACTIVE_TUNNEL_URL:
+        import urllib.request
+        from urllib.parse import quote
+        safe_fn = quote(filename)
+        remote_url = f"{ACTIVE_TUNNEL_URL}/api/stream/{safe_fn}"
+        try:
+            req = urllib.request.Request(remote_url)
+            remote_file = urllib.request.urlopen(req, timeout=60)
+            def generate():
+                while True:
+                    chunk = remote_file.read(64 * 1024)
+                    if not chunk:
+                        break
+                    yield chunk
+            headers = {
+                "Content-Type": remote_file.headers.get("Content-Type", "audio/mpeg")
+            }
+            return Response(generate(), headers=headers)
+        except Exception as e:
+            print(f"[TUNNEL STREAM ERROR]: {e}", flush=True)
+
     if not os.path.exists(file_path):
         return "File not found", 404
 
