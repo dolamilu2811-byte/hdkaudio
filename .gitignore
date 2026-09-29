@@ -1,0 +1,20 @@
+﻿# Large binaries (Windows exe not needed on Linux/Docker)
+bin/
+*.exe
+*.dll
+
+# Downloads & temp files
+downloads/
+temp_downloads/
+*.mp3
+*.m4a
+*.wav
+*.flac
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/

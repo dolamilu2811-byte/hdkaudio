@@ -1,0 +1,28 @@
+﻿=============================================================================
+           🎵 HƯỚNG DẪN SỬ DỤNG TOOL XUẤT NHẠC YOUTUBE CÁ NHÂN 🎵
+=============================================================================
+
+1. CÁCH KHỞI ĐỘNG CÔNG CỤ:
+   - Cách 1: Click đúp vào biểu tượng "Sonic Music Extractor" ngay trên Màn hình chính (Desktop).
+   - Cách 2: Vào thư mục E:\toolsvideo và click đúp vào file "Chay_Tool.bat".
+   => Trình duyệt web sẽ tự động mở trang: http://localhost:5000
+
+2. CÁCH TẢI / LẤY NHẠC:
+   - Bước 1: Copy link video YouTube, Shorts, hoặc bài nhạc bất kỳ.
+   - Bước 2: Bấm nút "📋 Dán Link" trên trang web (hoặc phím tắt Ctrl + V).
+   - Bước 3: Xem ảnh bìa, tên bài hát, chọn chất lượng (MP3 320kbps khuyên dùng).
+   - Bước 4: Bấm "⚡ BẮT ĐẦU XUẤT NHẠC".
+   - Bước 5: Nghe thử trực tiếp trên trình duyệt hoặc bấm "💾 Tải Về Trình Duyệt".
+
+3. FILE NHẠC ĐƯỢC LƯU Ở ĐÂU?
+   - Toàn bộ file nhạc xuất ra sẽ được tự động lưu vào thư mục:
+     E:\toolsvideo\downloads
+   - Bạn chỉ cần bấm nút "📂 Thư mục nhạc" trên web để mở trực tiếp thư mục này trong máy.
+
+4. TÍNH NĂNG NỔI BẬT:
+   - 100% không quảng cáo, tốc độ tải tối đa theo mạng nhà bạn.
+   - Hỗ trợ chuẩn MP3 320kbps, M4A gốc, WAV Studio.
+   - Tự động chèn Tên bài hát, Ca sĩ và Ảnh bìa (Album Art) vào file MP3.
+   - Có trình phát nghe thử (Audio Player) trực tiếp trên trang.
+   - Có thư viện lịch sử các bài đã tải để quản lý dễ dàng.
+=============================================================================

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HDK AUDIO - Trích Xuất Âm Thanh YouTube Trực Tuyến</title>
+  <meta name="description" content="Công cụ chuyển đổi và tải nhạc YouTube chất lượng cao MP3 320kbps trực tuyến.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/static/style.css?v=4.0">
+</head>
+
+<body>
+  <!-- Background Glow & Mesh Orbs -->
+  <div class="bg-glow-orb orb-1"></div>
+  <div class="bg-glow-orb orb-2"></div>
+  <div class="bg-glow-orb orb-3"></div>
+  <div class="bg-grid-overlay"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-box">
+          <div class="equalizer-bars">
+            <span class="bar bar-1"></span>
+            <span class="bar bar-2"></span>
+            <span class="bar bar-3"></span>
+            <span class="bar bar-4"></span>
+          </div>
+        </div>
+        <div class="brand-text">
+          <h1>HDK<span>AUDIO</span></h1>
+          <p class="tagline">Tải Nhạc Chất Lượng Cao Từ YouTube</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge-status online"><span class="dot"></span> Trực tuyến 24/7</span>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Input Card -->
+      <section class="glass-card input-card">
+        <div class="card-glow-edge"></div>
+        <div class="input-section-header">
+          <h2><i class="fa-brands fa-youtube icon-yt"></i> Dán đường link YouTube vào đây</h2>
+          <span class="hint-pill">Hỗ trợ Video, Shorts & Âm nhạc</span>
+        </div>
+
+        <div class="url-input-wrapper">
+          <div class="input-prefix-icon">
+            <i class="fa-solid fa-link"></i>
+          </div>
+          <input 
+            type="text" 
+            id="urlInput" 
+            placeholder="Dán link YouTube vào đây (Ctrl + V)..." 
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button id="btnClear" class="input-action-btn btn-clear hidden" title="Xóa link">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <button id="btnPaste" class="btn-paste" title="Dán từ Clipboard">
+            <i class="fa-regular fa-clipboard"></i> Dán Link
+          </button>
+          <button id="btnFetchInfo" class="btn-analyze">
+            <span class="btn-text">Phân tích</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
+        <!-- Notification / Error Box -->
+        <div id="notifyBox" class="notify-box hidden">
+          <i class="fa-solid fa-circle-exclamation notify-icon"></i>
+          <span id="notifyMsg"></span>
+        </div>
+      </section>
+
+      <!-- Video Preview & Conversion Settings Card -->
+      <section id="previewCard" class="glass-card preview-card hidden">
+        <div class="card-glow-edge"></div>
+        <div class="preview-layout">
+          <!-- Thumbnail & Info -->
+          <div class="video-media-box">
+            <div class="thumb-container">
+              <img id="videoThumb" src="" alt="Thumbnail" loading="lazy">
+              <span id="videoDuration" class="duration-badge">00:00</span>
+              <div class="thumb-hover-overlay">
+                <i class="fa-solid fa-music play-icon-overlay"></i>
+              </div>
+            </div>
+            <div class="video-meta">
+              <h3 id="videoTitle" class="video-title">Tên video đang tải...</h3>
+              <div class="video-submeta">
+                <span class="channel-name"><i class="fa-solid fa-circle-check"></i> <span id="videoChannel">Kênh YouTube</span></span>
+                <span class="bullet">•</span>
+                <span class="views-count"><i class="fa-regular fa-eye"></i> <span id="videoViews">0</span> lượt xem</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Settings & Download trigger -->
+          <div class="settings-box">
+            <div class="settings-grid">
+              <!-- Format Selector -->
+              <div class="setting-item">
+                <label for="formatSelect"><i class="fa-solid fa-file-audio"></i> Định dạng âm thanh</label>
+                <div class="custom-select-wrap">
+                  <select id="formatSelect">
+                    <option value="mp3" selected>MP3 (Phổ biến nhất)</option>
+                    <option value="m4a">M4A / AAC (Chuẩn Apple)</option>
+                    <option value="wav">WAV (Không nén Studio)</option>
+                    <option value="flac">FLAC (Lossless)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Quality Selector -->
+              <div class="setting-item">
+                <label for="qualitySelect"><i class="fa-solid fa-sliders"></i> Chất lượng Bitrate</label>
+                <div class="custom-select-wrap">
+                  <select id="qualitySelect">
+                    <option value="320" selected>320 kbps (Cực nét - Khuyên dùng)</option>
+                    <option value="256">256 kbps (Rất cao)</option>
+                    <option value="192">192 kbps (Chuẩn CD)</option>
+                    <option value="128">128 kbps (Tiết kiệm bộ nhớ)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Toggles -->
+            <div class="toggles-row">
+              <label class="custom-toggle">
+                <input type="checkbox" id="chkEmbedThumb" checked>
+                <span class="toggle-slider"></span>
+                <span class="toggle-label"><i class="fa-regular fa-image"></i> Gắn ảnh bìa & ID3 Tag vào file</span>
+              </label>
+            </div>
+
+            <!-- Start Action Button -->
+            <button id="btnStartDownload" class="btn-primary-action">
+              <div class="btn-primary-bg"></div>
+              <span class="btn-content">
+                <i class="fa-solid fa-bolt-lightning"></i>
+                <span class="action-text">BẮT ĐẦU XUẤT NHẠC</span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Progress Tracking Card -->
+      <section id="progressCard" class="glass-card progress-card hidden">
+        <div class="card-glow-edge"></div>
+        <div class="progress-header">
+          <div class="progress-title-wrap">
+            <div class="spinner-neon"></div>
+            <div>
+              <h3 id="progressStatusText">Đang chuẩn bị tiến trình...</h3>
+              <p id="progressDetailText" class="progress-details">Đang kết nối YouTube</p>
+            </div>
+          </div>
+          <div class="percent-display">
+            <span id="percentNumber">0</span><span class="percent-symbol">%</span>
+          </div>
+        </div>
+
+        <div class="progress-bar-container">
+          <div id="progressBar" class="progress-bar-fill" style="width: 0%;">
+            <div class="progress-bar-shine"></div>
+          </div>
+        </div>
+
+        <div class="progress-meta-info">
+          <span id="progressDownloaded">0 MB / 0 MB</span>
+          <span id="progressSpeed">-- MB/s</span>
+          <span id="progressEta">Còn lại: --</span>
+        </div>
+      </section>
+
+      <!-- Completed & Audio Player Card -->
+      <section id="resultCard" class="glass-card result-card hidden">
+        <div class="card-glow-edge"></div>
+        <div class="result-header">
+          <div class="success-badge">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Đã tạo file nhạc thành công!</span>
+          </div>
+          <span class="storage-notice"><i class="fa-solid fa-shield-halved"></i> Tải trực tiếp về thiết bị của bạn</span>
+        </div>
+
+        <div class="player-container">
+          <div class="player-info">
+            <i class="fa-solid fa-compact-disc disc-spinning"></i>
+            <span id="resultFileName" class="result-filename">ten_bai_hat.mp3</span>
+          </div>
+          <audio id="audioPlayer" controls preload="metadata">
+            Trình duyệt của bạn không hỗ trợ audio element.
+          </audio>
+        </div>
+
+        <div class="result-actions">
+          <a id="btnDownloadBrowser" href="#" download class="btn-action btn-download-file">
+            <i class="fa-solid fa-cloud-arrow-down"></i> TẢI VỀ THIẾT BỊ NGAY
+          </a>
+          <button id="btnConvertAnother" class="btn-action btn-secondary-action">
+            <i class="fa-solid fa-plus"></i> Xuất Bài Khác
+          </button>
+        </div>
+      </section>
+
+      <!-- Library / History Section -->
+      <section class="glass-card history-card">
+        <div class="card-glow-edge"></div>
+        <div class="history-header">
+          <div class="history-title-group">
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> Các bài vừa tải trong phiên này</h3>
+            <span id="historyCountBadge" class="count-badge">0 bài</span>
+          </div>
+          <div class="history-actions-group">
+            <button id="btnClearHistory" class="btn-glass-sm" title="Xóa lịch sử phiên">
+              <i class="fa-regular fa-trash-can"></i> Xóa danh sách
+            </button>
+          </div>
+        </div>
+
+        <div id="historyList" class="history-list">
+          <div class="empty-state">
+            <i class="fa-solid fa-music empty-icon"></i>
+            <p>Chưa có bài hát nào được tải trong phiên này.</p>
+            <span>Dán link phía trên để bắt đầu xuất bài hát đầu tiên!</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Tải nhạc cá nhân từ youtube được thực hiện bởi HDK</p>
+    </footer>
+  </div>
+
+  <script src="/static/app.js?v=4.0"></script>
+</body>
+
+</html>
