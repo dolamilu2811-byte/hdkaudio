@@ -1,4 +1,4 @@
-import os
+﻿import os
 import sys
 
 # Configure UTF-8 for console output on Windows
@@ -121,7 +121,7 @@ def get_info():
         'retries': 2,
         'extractor_args': {
             'youtube': {
-                'player_client': ['android', 'ios']
+                'player_client': ['visionos', 'web']
             }
         },
         'ffmpeg_location': BIN_DIR if os.path.exists(BIN_DIR) else None,
@@ -225,7 +225,7 @@ def run_download(task_id, url, audio_format, quality, embed_thumb):
         'noplaylist': True,
         'extractor_args': {
             'youtube': {
-                'player_client': ['android', 'ios']
+                'player_client': ['visionos', 'web']
             }
         },
         'socket_timeout': 15,
@@ -346,3 +346,4 @@ if __name__ == "__main__":
     print(f"URL: http://localhost:{port}")
     print("=======================================================")
     app.run(host="0.0.0.0", port=port, debug=False)
+
