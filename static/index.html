@@ -3,14 +3,14 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>HDK AUDIO - Trích Xuất Âm Thanh YouTube Trực Tuyến</title>
   <meta name="description" content="Công cụ chuyển đổi và tải nhạc YouTube chất lượng cao MP3 320kbps trực tuyến.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="/static/style.css?v=4.0">
+  <link rel="stylesheet" href="/static/style.css?v=5.0">
 </head>
 
 <body>
@@ -38,7 +38,7 @@
         </div>
       </div>
       <div class="header-badges">
-        <span class="badge-status online"><span class="dot"></span> Trực tuyến 24/7</span>
+        <span class="badge-status online"><span class="dot"></span> Online 24/7</span>
       </div>
     </header>
 
@@ -48,31 +48,35 @@
       <section class="glass-card input-card">
         <div class="card-glow-edge"></div>
         <div class="input-section-header">
-          <h2><i class="fa-brands fa-youtube icon-yt"></i> Dán đường link YouTube vào đây</h2>
-          <span class="hint-pill">Hỗ trợ Video, Shorts & Âm nhạc</span>
+          <h2><i class="fa-brands fa-youtube icon-yt"></i> Dán link YouTube vào đây</h2>
+          <span class="hint-pill">Video, Shorts & Âm nhạc</span>
         </div>
 
-        <div class="url-input-wrapper">
-          <div class="input-prefix-icon">
-            <i class="fa-solid fa-link"></i>
+        <div class="url-input-group">
+          <div class="url-input-bar">
+            <div class="input-prefix-icon">
+              <i class="fa-solid fa-link"></i>
+            </div>
+            <input 
+              type="text" 
+              id="urlInput" 
+              placeholder="Dán link YouTube (Ctrl + V)..." 
+              autocomplete="off"
+              spellcheck="false"
+            >
+            <button id="btnClear" class="input-action-btn btn-clear hidden" title="Xóa link">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
           </div>
-          <input 
-            type="text" 
-            id="urlInput" 
-            placeholder="Dán link YouTube vào đây (Ctrl + V)..." 
-            autocomplete="off"
-            spellcheck="false"
-          >
-          <button id="btnClear" class="input-action-btn btn-clear hidden" title="Xóa link">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-          <button id="btnPaste" class="btn-paste" title="Dán từ Clipboard">
-            <i class="fa-regular fa-clipboard"></i> Dán Link
-          </button>
-          <button id="btnFetchInfo" class="btn-analyze">
-            <span class="btn-text">Phân tích</span>
-            <i class="fa-solid fa-arrow-right"></i>
-          </button>
+          <div class="url-input-actions">
+            <button id="btnPaste" class="btn-paste" title="Dán từ Clipboard">
+              <i class="fa-regular fa-clipboard"></i> Dán Link
+            </button>
+            <button id="btnFetchInfo" class="btn-analyze">
+              <span class="btn-text">Phân tích</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
         </div>
 
         <!-- Notification / Error Box -->
@@ -193,7 +197,7 @@
             <i class="fa-solid fa-circle-check"></i>
             <span>Đã tạo file nhạc thành công!</span>
           </div>
-          <span class="storage-notice"><i class="fa-solid fa-shield-halved"></i> Tải trực tiếp về thiết bị của bạn</span>
+          <span class="storage-notice"><i class="fa-solid fa-shield-halved"></i> Tải trực tiếp về thiết bị</span>
         </div>
 
         <div class="player-container">
@@ -221,7 +225,7 @@
         <div class="card-glow-edge"></div>
         <div class="history-header">
           <div class="history-title-group">
-            <h3><i class="fa-solid fa-clock-rotate-left"></i> Các bài vừa tải trong phiên này</h3>
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> Các bài vừa tải</h3>
             <span id="historyCountBadge" class="count-badge">0 bài</span>
           </div>
           <div class="history-actions-group">
@@ -247,7 +251,7 @@
     </footer>
   </div>
 
-  <script src="/static/app.js?v=4.0"></script>
+  <script src="/static/app.js?v=5.0"></script>
 </body>
 
 </html>

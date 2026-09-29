@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
 
     try {
       const res = await fetch('/api/info', {
@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } catch (err) {
       if (err.name === 'AbortError') {
-        showNotification('Quá thời gian kết nối YouTube (12s). Bạn vui lòng bấm "Phân tích" lại một lần nữa!');
+        showNotification('Quá thời gian kết nối YouTube (25s). Bạn vui lòng bấm "Phân tích" lại một lần nữa!');
       } else {
         showNotification(err.message || 'Lỗi khi kết nối tới máy chủ.');
       }
