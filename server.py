@@ -489,7 +489,7 @@ def download_file(filename):
 def download_app():
     zip_path = os.path.join(BASE_DIR, "HDK_Audio_Portable.zip")
     if os.path.exists(zip_path):
-        return send_file(zip_path, as_attachment=True, download_name="HDK_Audio_Portable.zip")
+        return send_from_directory(BASE_DIR, "HDK_Audio_Portable.zip", as_attachment=True)
     if ACTIVE_TUNNEL_URL:
         import urllib.request
         remote_url = f"{ACTIVE_TUNNEL_URL}/download-app"
