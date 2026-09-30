@@ -437,10 +437,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const badge = document.getElementById('systemStatusBadge');
       if (badge) {
         if (data.is_connected) {
-          badge.innerHTML = '<span class="dot" style="background:#10b981;box-shadow:0 0 10px #10b981;"></span> Siêu Tốc (PC Đã Kết Nối)';
-          badge.title = 'Đang kết nối qua máy tính cá nhân - Tải được 100% video dài, mix, playlist không bị chặn!';
+          badge.innerHTML = '<span class="dot" style="background:#10b981;box-shadow:0 0 10px #10b981;"></span> Tải Nhạc Siêu Tốc';
+          badge.title = 'Tải Nhạc Siêu Tốc - Tải được 100% video dài, mix, playlist không giới hạn!';
         } else {
-          badge.innerHTML = '<span class="dot"></span> Online 24/7 (Đám mây)';
+          badge.innerHTML = '<span class="dot"></span> Tải Nhạc Siêu Tốc';
         }
       }
     } catch (e) {}
