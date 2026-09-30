@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } catch (err) {
       if (err.name === 'AbortError') {
-        showNotification('Quá thời gian kết nối YouTube (45s). Bạn vui lòng bấm "Phân tích" lại một lần nữa!');
+        showNotification('Quá thời gian kết nối YouTube (45s). Gợi ý: Hãy bấm nút "Tải App Cho PC" phía trên để tải trực tiếp trên máy tính tốc độ 100 MB/s không bị chặn!');
       } else {
         showNotification(err.message || 'Lỗi khi kết nối tới máy chủ.');
       }

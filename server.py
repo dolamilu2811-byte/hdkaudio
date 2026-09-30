@@ -483,6 +483,35 @@ def download_file(filename):
 
     return send_from_directory(TEMP_CACHE_DIR, filename, as_attachment=True)
 
+
+@app.route("/download-app")
+@app.route("/api/download-app")
+def download_app():
+    zip_path = os.path.join(BASE_DIR, "HDK_Audio_Portable.zip")
+    if os.path.exists(zip_path):
+        return send_file(zip_path, as_attachment=True, download_name="HDK_Audio_Portable.zip")
+    if ACTIVE_TUNNEL_URL:
+        import urllib.request
+        remote_url = f"{ACTIVE_TUNNEL_URL}/download-app"
+        try:
+            req = urllib.request.Request(remote_url)
+            remote_file = urllib.request.urlopen(req, timeout=120)
+            def generate():
+                while True:
+                    chunk = remote_file.read(128 * 1024)
+                    if not chunk:
+                        break
+                    yield chunk
+            headers = {
+                "Content-Disposition": 'attachment; filename="HDK_Audio_Portable.zip"',
+                "Content-Type": "application/zip"
+            }
+            return Response(generate(), headers=headers)
+        except Exception as e:
+            print(f"[TUNNEL DOWNLOAD APP ERROR]: {e}", flush=True)
+
+    return jsonify({"error": "File đang được tải lên hoặc chưa sẵn sàng. Bạn vui lòng thử lại sau giây lát!"}), 404
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     print("=======================================================")

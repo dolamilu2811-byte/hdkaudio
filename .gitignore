@@ -2,6 +2,8 @@
 bin/
 *.exe
 *.dll
+*.zip
+HDK_Audio_Portable/
 
 # Downloads & temp files
 downloads/
@@ -14,7 +16,7 @@ temp_downloads/
 # Python artifacts
 __pycache__/
 *.py[cod]
-*$py.class
+*.class
 .venv/
 venv/
 ENV/
