@@ -36,9 +36,17 @@
   --shadow-card: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
 }
 
-* {
+html {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden !important;
+  -webkit-text-size-adjust: 100%;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
@@ -47,9 +55,13 @@ body {
   background-color: var(--bg-main);
   color: var(--text-main);
   min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
   position: relative;
-  overflow-x: hidden;
+  overflow-x: hidden !important;
   line-height: 1.5;
+  margin: 0;
+  padding: 0;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -184,7 +196,9 @@ body {
 .header-badges {
   display: flex;
   align-items: center;
-  flex-shrink: 0;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .badge-status {
@@ -1008,150 +1022,6 @@ audio {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ==========================================================================
-   MOBILE RESPONSIVE RULES (DÀNH RIÊNG CHO ĐIỆN THOẠI & MÀN HÌNH NHỎ)
-   ========================================================================== */
-
-@media (max-width: 640px) {
-  .app-container {
-    padding: 16px 12px 40px;
-  }
-
-  .app-header {
-    margin-bottom: 20px;
-    align-items: center;
-  }
-
-  .logo-box {
-    width: 40px;
-    height: 40px;
-  }
-
-  .equalizer-bars {
-    height: 16px;
-    gap: 2.5px;
-  }
-
-  .brand-text h1 {
-    font-size: 1.3rem;
-  }
-
-  .brand-text .tagline {
-    font-size: 0.72rem;
-  }
-
-  .badge-status {
-    font-size: 0.72rem;
-    padding: 4px 10px;
-  }
-
-  .glass-card {
-    padding: 18px 14px;
-    border-radius: 16px;
-    margin-bottom: 16px;
-  }
-
-  .input-section-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-    margin-bottom: 14px;
-  }
-
-  .input-section-header h2 {
-    font-size: 1.05rem;
-  }
-
-  /* Break URL Input into clean 2-row layout on phones */
-  .url-input-group {
-    background: transparent;
-    border: none;
-    padding: 0;
-    box-shadow: none;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-  }
-
-  .url-input-bar {
-    width: 100%;
-    background: rgba(10, 11, 18, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 12px;
-    padding: 4px 8px;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
-  }
-
-  .url-input-bar input {
-    font-size: 0.9rem;
-    padding: 10px 4px;
-  }
-
-  .url-input-actions {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1.3fr;
-    gap: 8px;
-  }
-
-  .btn-paste, .btn-analyze {
-    width: 100%;
-    height: 46px;
-    font-size: 0.92rem;
-    border-radius: 10px;
-    margin: 0;
-  }
-
-  .preview-layout {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  .settings-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-    margin-bottom: 14px;
-  }
-
-  .btn-primary-action {
-    padding: 14px 18px;
-    border-radius: 12px;
-  }
-
-  .btn-content {
-    font-size: 0.95rem;
-  }
-
-  .result-actions {
-    flex-direction: column;
-    width: 100%;
-    gap: 10px;
-  }
-
-  .btn-action {
-    width: 100%;
-    min-width: unset;
-    padding: 14px;
-    font-size: 0.92rem;
-  }
-
-  .history-item {
-    padding: 10px 12px;
-  }
-
-  .audio-icon-pill {
-    width: 36px;
-    height: 36px;
-    font-size: 0.95rem;
-  }
-
-  .history-title {
-    font-size: 0.85rem;
-  }
-}
-
-
 /* Download App Button & Promo Card */
 .badge-app-download {
   display: inline-flex;
@@ -1646,4 +1516,459 @@ audio {
 }
 .btn-call-admin:hover {
   background: #2563eb;
+}
+
+
+
+/* ==========================================================================
+   MOBILE & TABLET RESPONSIVE SYSTEM (TỰ ĐỘNG KHỚP VỪA MỌI ĐIỆN THOẠI)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+  }
+
+  .app-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 14px 12px 40px !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Header - Chuyển sang xếp dọc cân đối giữa màn hình */
+  .app-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 12px !important;
+    margin-bottom: 18px !important;
+    width: 100% !important;
+  }
+
+  .brand {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    text-align: left !important;
+  }
+
+  .logo-box {
+    width: 40px !important;
+    height: 40px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .equalizer-bars {
+    height: 16px !important;
+    gap: 2.5px !important;
+  }
+
+  .brand-text h1 {
+    font-size: 1.35rem !important;
+    letter-spacing: 0.3px !important;
+  }
+
+  .brand-text .tagline {
+    font-size: 0.74rem !important;
+    margin-top: 2px !important;
+  }
+
+  /* Badges - Tự động wrap xuống dòng mượt mà, không bị tràn màn hình */
+  .header-badges {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 6px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-shrink: 1 !important;
+    margin-top: 2px !important;
+  }
+
+  .badge-app-download,
+  .badge-license-pill,
+  .badge-status {
+    font-size: 0.72rem !important;
+    padding: 5px 10px !important;
+    border-radius: 9999px !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .badge-license-pill {
+    gap: 6px !important;
+  }
+
+  /* Banner thông báo khóa/bảo trì - Tự co giãn vừa vặn */
+  .system-locked-banner {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    padding: 12px 14px !important;
+    border-radius: 12px !important;
+    margin-bottom: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .system-locked-banner i {
+    font-size: 20px !important;
+    margin-top: 2px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .locked-text strong {
+    font-size: 13.5px !important;
+    line-height: 1.3 !important;
+  }
+
+  .locked-text span {
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    margin-top: 2px !important;
+  }
+
+  /* Card quảng bá tải cho máy tính - Tinh gọn trên điện thoại */
+  .desktop-promo-card {
+    padding: 12px 14px !important;
+    margin-bottom: 14px !important;
+    border-radius: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .desktop-promo-card .promo-body {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .desktop-promo-card .promo-info h3 {
+    font-size: 0.95rem !important;
+    line-height: 1.3 !important;
+  }
+
+  .desktop-promo-card .promo-info p {
+    font-size: 0.78rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .desktop-promo-card .btn-promo-dl {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 9px 14px !important;
+    font-size: 0.82rem !important;
+  }
+
+  /* Glass Card chung */
+  .glass-card {
+    padding: 16px 12px !important;
+    border-radius: 14px !important;
+    margin-bottom: 14px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .input-section-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .input-section-header h2 {
+    font-size: 1rem !important;
+    line-height: 1.3 !important;
+  }
+
+  .platforms-badge {
+    font-size: 0.72rem !important;
+    padding: 3px 8px !important;
+  }
+
+  /* Ô nhập link YouTube / Facebook - 2 hàng chuẩn mượt */
+  .url-input-group {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .url-input-bar {
+    width: 100% !important;
+    background: rgba(10, 11, 18, 0.92) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 12px !important;
+    padding: 4px 8px !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  .url-input-bar input {
+    font-size: 0.88rem !important;
+    padding: 8px 4px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .url-input-actions {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1.25fr !important;
+    gap: 8px !important;
+  }
+
+  .btn-paste, .btn-analyze {
+    width: 100% !important;
+    height: 44px !important;
+    font-size: 0.88rem !important;
+    border-radius: 10px !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+  }
+
+  /* Layout Phân tích xem trước video */
+  .preview-layout {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .custom-select-wrap select {
+    width: 100% !important;
+    font-size: 0.85rem !important;
+    padding: 10px 12px !important;
+  }
+
+  .toggles-row {
+    margin-bottom: 14px !important;
+  }
+
+  .btn-primary-action {
+    width: 100% !important;
+    padding: 13px 16px !important;
+    border-radius: 12px !important;
+  }
+
+  .btn-content {
+    font-size: 0.9rem !important;
+    justify-content: center !important;
+  }
+
+  /* Tiến trình tải */
+  .progress-meta-info {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    font-size: 0.78rem !important;
+    justify-content: space-between !important;
+  }
+
+  /* Kết quả tải & Trình phát */
+  .result-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 6px !important;
+  }
+
+  .result-actions {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .btn-action {
+    width: 100% !important;
+    min-width: unset !important;
+    padding: 12px !important;
+    font-size: 0.88rem !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+
+  .video-player-wrap video {
+    max-height: 260px !important;
+  }
+
+  /* Lịch sử tải */
+  .history-header {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .history-title-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .history-title-group h3 {
+    font-size: 0.98rem !important;
+  }
+
+  .btn-clear-history {
+    font-size: 0.75rem !important;
+    padding: 4px 8px !important;
+  }
+
+  .history-item {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 10px 12px !important;
+  }
+
+  .history-item-left {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .audio-icon-pill {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 0.9rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  .history-title {
+    font-size: 0.83rem !important;
+    word-break: break-word !important;
+  }
+
+  .history-actions {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 6px !important;
+    width: 100% !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+    padding-top: 8px !important;
+  }
+
+  .history-actions .btn-hist-action {
+    flex: 1 !important;
+    justify-content: center !important;
+    text-align: center !important;
+    font-size: 0.78rem !important;
+    padding: 6px 10px !important;
+  }
+
+  /* Modal Hộp thoại Cookie & Bản quyền trên điện thoại */
+  .cookie-modal-overlay {
+    padding: 10px !important;
+    align-items: center !important;
+  }
+
+  .cookie-modal-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 88vh !important;
+    overflow-y: auto !important;
+    border-radius: 16px !important;
+    padding: 0 !important;
+  }
+
+  .modal-header {
+    padding: 12px 14px !important;
+  }
+
+  .modal-header h3 {
+    font-size: 0.96rem !important;
+  }
+
+  .modal-body {
+    padding: 14px !important;
+  }
+
+  .cookie-inputs-grid {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .lic-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+    padding: 8px 0 !important;
+  }
+
+  .lic-code-wrap {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+
+  .activate-input-row {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .btn-activate-key {
+    width: 100% !important;
+    padding: 11px !important;
+    font-size: 13px !important;
+  }
+
+  .app-footer {
+    font-size: 0.75rem !important;
+    padding: 0 8px !important;
+    line-height: 1.4 !important;
+    margin-top: 24px !important;
+  }
+}
+
+/* Tối ưu riêng cho các điện thoại nhỏ (iPhone SE, màn hình < 390px) */
+@media (max-width: 390px) {
+  .app-container {
+    padding: 10px 8px 30px !important;
+  }
+
+  .brand-text h1 {
+    font-size: 1.18rem !important;
+  }
+
+  .header-badges {
+    gap: 5px !important;
+  }
+
+  .badge-app-download,
+  .badge-license-pill,
+  .badge-status {
+    font-size: 0.68rem !important;
+    padding: 4px 7px !important;
+  }
+
+  .url-input-actions {
+    grid-template-columns: 1fr !important;
+  }
 }

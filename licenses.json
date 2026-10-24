@@ -4,11 +4,23 @@
     "name": "Khách mới (UB642M)",
     "ip": "42.117.134.7",
     "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
-    "created_at": 1792812439,
-    "expires_at": 1792898839,
+    "created_at": 1792812657,
+    "expires_at": 1793503857,
     "status": "active",
     "is_lifetime": false,
     "download_count": 0,
-    "last_active": 1792812439
+    "last_active": 1792812657
+  },
+  "HDK-BXYWEG74DF": {
+    "client_id": "HDK-BXYWEG74DF",
+    "name": "Khách mới (EG74DF)",
+    "ip": "27.67.130.13",
+    "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6 Mobile/15E1",
+    "created_at": 1792812719,
+    "expires_at": 1793503919,
+    "status": "active",
+    "is_lifetime": false,
+    "download_count": 0,
+    "last_active": 1792812719
   }
 }
