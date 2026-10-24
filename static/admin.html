@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="/static/admin.css?v=1.0">
+  <link rel="stylesheet" href="/static/admin.css?v=2.0">
 </head>
 <body>
   <!-- Background Ambient Lights -->
@@ -311,12 +311,26 @@
     </main>
   </div>
 
+  
+  <!-- Custom Glassmorphism Confirm Modal (No browser dialogs) -->
+  <div id="confirmModal" class="confirm-modal-overlay hidden">
+    <div class="confirm-modal-box glass-panel">
+      <div id="confirmIconBox" class="confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <h3 id="confirmTitle">Xác nhận thao tác</h3>
+      <p id="confirmDesc">Bạn có chắc chắn muốn thực hiện thao tác này?</p>
+      <div class="confirm-actions">
+        <button id="btnCancelConfirm" class="btn-cancel">Hủy</button>
+        <button id="btnAcceptConfirm" class="btn-danger">Xác Nhận</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Notification Toast -->
   <div id="toastBox" class="toast-box hidden">
     <i id="toastIcon" class="fa-solid fa-circle-check"></i>
     <span id="toastMsg">Thành công!</span>
   </div>
 
-  <script src="/static/admin.js?v=1.0"></script>
+  <script src="/static/admin.js?v=2.0"></script>
 </body>
 </html>

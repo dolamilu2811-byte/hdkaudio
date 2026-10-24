@@ -1,14 +1,14 @@
 {
-  "HDK-TESTCLIENT01": {
-    "client_id": "HDK-TESTCLIENT01",
-    "name": "Khách mới (IENT01)",
+  "HDK-7X4YJ5PHWR": {
+    "client_id": "HDK-7X4YJ5PHWR",
+    "name": "Khách mới (J5PHWR)",
     "ip": "127.0.0.1",
-    "user_agent": "Python-urllib/3.12",
-    "created_at": 1792810532,
-    "expires_at": 1796093732,
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "created_at": 1792810916,
+    "expires_at": 1824606116,
     "status": "active",
     "is_lifetime": false,
     "download_count": 0,
-    "last_active": 1792810552
+    "last_active": 1792811076
   }
 }

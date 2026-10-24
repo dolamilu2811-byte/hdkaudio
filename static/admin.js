@@ -1,4 +1,4 @@
-// HDK MEDIA ADMIN DASHBOARD SCRIPT
+// HDK MEDIA ADMIN DASHBOARD SCRIPT - NO BROWSER POPUPS (INLINE EDIT & CUSTOM MODAL)
 document.addEventListener('DOMContentLoaded', () => {
   const TOKEN_KEY = 'hdk_admin_token_v1';
   let adminToken = sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY);
@@ -62,12 +62,46 @@ document.addEventListener('DOMContentLoaded', () => {
   const toastMsg = document.getElementById('toastMsg');
   const toastIcon = document.getElementById('toastIcon');
 
+  // Custom Confirm Modal Elements
+  const confirmModal = document.getElementById('confirmModal');
+  const confirmTitle = document.getElementById('confirmTitle');
+  const confirmDesc = document.getElementById('confirmDesc');
+  const btnCancelConfirm = document.getElementById('btnCancelConfirm');
+  const btnAcceptConfirm = document.getElementById('btnAcceptConfirm');
+  let confirmCallback = null;
+
   function showToast(msg, isSuccess = true) {
     toastMsg.textContent = msg;
     toastIcon.className = isSuccess ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation';
     toastIcon.style.color = isSuccess ? 'var(--accent-green)' : 'var(--accent-red)';
     toastBox.classList.remove('hidden');
     setTimeout(() => { toastBox.classList.add('hidden'); }, 3500);
+  }
+
+  function showCustomConfirm(title, desc, onConfirm, isDanger = true) {
+    confirmTitle.textContent = title;
+    confirmDesc.textContent = desc;
+    confirmCallback = onConfirm;
+    btnAcceptConfirm.className = isDanger ? 'btn-danger' : 'btn-submit';
+    confirmModal.classList.remove('hidden');
+  }
+
+  function closeCustomConfirm() {
+    confirmModal.classList.add('hidden');
+    confirmCallback = null;
+  }
+
+  if (btnCancelConfirm) btnCancelConfirm.addEventListener('click', closeCustomConfirm);
+  if (btnAcceptConfirm) {
+    btnAcceptConfirm.addEventListener('click', () => {
+      if (confirmCallback) confirmCallback();
+      closeCustomConfirm();
+    });
+  }
+  if (confirmModal) {
+    confirmModal.addEventListener('click', (e) => {
+      if (e.target === confirmModal) closeCustomConfirm();
+    });
   }
 
   // Toggle Password Visibility
@@ -116,14 +150,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Logout handler
   btnLogout.addEventListener('click', () => {
-    if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi trang Quản trị?')) {
-      adminToken = null;
-      sessionStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(TOKEN_KEY);
-      loginOverlay.classList.remove('hidden');
-      adminApp.classList.add('hidden');
-      adminPass.value = '';
-    }
+    showCustomConfirm(
+      'Đăng Xuất Khỏi Quản Trị',
+      'Bạn có chắc chắn muốn đăng xuất khỏi Bảng điều khiển Quản trị?',
+      () => {
+        adminToken = null;
+        sessionStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(TOKEN_KEY);
+        loginOverlay.classList.remove('hidden');
+        adminApp.classList.add('hidden');
+        adminPass.value = '';
+      },
+      false
+    );
   });
 
   // Auth fetch helper
@@ -132,7 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
     options.headers['Authorization'] = `Bearer ${adminToken}`;
     const res = await fetch(url, options);
     if (res.status === 401) {
-      // Token expired or invalid
       sessionStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(TOKEN_KEY);
       loginOverlay.classList.remove('hidden');
@@ -165,12 +203,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Render Dashboard
   function renderDashboard(data) {
-    // 1. Master Switch state
     const isMasterOn = data.master_switch;
     masterSwitchToggle.checked = isMasterOn;
     updateMasterSwitchUI(isMasterOn);
 
-    // 2. Summary stats
     statSystemState.textContent = isMasterOn ? 'BẬT (Online)' : 'TẮT (Đã khóa)';
     statSystemState.style.color = isMasterOn ? 'var(--accent-green)' : 'var(--accent-red)';
     statTotalClients.textContent = data.stats.total_clients || 0;
@@ -180,15 +216,11 @@ document.addEventListener('DOMContentLoaded', () => {
     tabCountClients.textContent = data.stats.total_clients || 0;
     tabCountKeys.textContent = data.stats.total_keys || 0;
 
-    // 3. Settings inputs
     cfgTrialDays.value = data.trial_days || 1;
     cfgContact.value = data.admin_contact || '037.2222.700';
     cfgBroadcast.value = data.broadcast_message || '';
 
-    // 4. Render Clients Table
     renderClientsTable();
-
-    // 5. Render Keys Table
     renderKeysTable(data.keys || []);
   }
 
@@ -257,12 +289,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const query = clientSearchInput.value.trim().toLowerCase();
     let clients = dashboardCache.clients.filter(c => {
-      // Filter status
       if (activeFilter === 'active' && c.status !== 'active') return false;
       if (activeFilter === 'expired' && c.status !== 'expired') return false;
       if (activeFilter === 'blocked' && c.status !== 'blocked') return false;
 
-      // Filter query
       if (query) {
         const matchName = (c.name || '').toLowerCase().includes(query);
         const matchId = (c.client_id || '').toLowerCase().includes(query);
@@ -298,9 +328,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       return `
         <tr data-client-id="${c.client_id}">
-          <td>
-            <div class="client-name-row">
-              <span class="client-name-text" title="Bấm để đổi tên">${escapeHtml(c.name)}</span>
+          <td class="client-cell-name">
+            <div class="client-name-row" id="nameRow_${c.client_id}">
+              <span class="client-name-text" data-action="rename" data-id="${c.client_id}" data-name="${escapeHtml(c.name)}" title="Bấm vào để đổi tên trực tiếp">${escapeHtml(c.name)}</span>
               <button class="btn-edit-name" data-action="rename" data-id="${c.client_id}" data-name="${escapeHtml(c.name)}" title="Đổi tên ghi chú"><i class="fa-solid fa-pen"></i></button>
             </div>
             <span class="client-id-badge">${c.client_id}</span>
@@ -332,6 +362,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Client Table Action Event Delegation
   clientsTableBody.addEventListener('click', async (e) => {
+    // 1. Check if user clicked rename or the name text
+    const renameTrigger = e.target.closest('[data-action="rename"]');
+    if (renameTrigger) {
+      const clientId = renameTrigger.dataset.id;
+      const currentName = renameTrigger.dataset.name || '';
+      startInlineEdit(clientId, currentName);
+      return;
+    }
+
     const btn = e.target.closest('button');
     if (!btn) return;
 
@@ -339,85 +378,154 @@ document.addEventListener('DOMContentLoaded', () => {
     const clientId = btn.dataset.id;
     if (!action || !clientId) return;
 
-    if (action === 'rename') {
-      const currentName = btn.dataset.name || '';
-      const newName = prompt('Nhập tên hoặc ghi chú mới cho khách này (VD: Anh Nam - Zalo 098xxx):', currentName);
-      if (newName !== null && newName.trim() && newName.trim() !== currentName) {
-        try {
-          const res = await authFetch('/api/admin/client/update', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ client_id: clientId, name: newName.trim() })
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error);
-          showToast('Đã đổi tên khách hàng thành công!');
-          loadDashboard();
-        } catch (err) {
-          showToast(err.message, false);
-        }
-      }
-    } else if (action === 'extend') {
+    // 2. Extend license: INSTANT 1-CLICK (No popup!)
+    if (action === 'extend') {
       const days = parseInt(btn.dataset.days);
       const isLifetime = (days === -1);
-      const confirmMsg = isLifetime 
-        ? `Xác nhận kích hoạt bản quyền VĨNH VIỄN cho thiết bị ${clientId}?`
-        : `Xác nhận gia hạn thêm ${days} ngày cho thiết bị ${clientId}?`;
+      btn.disabled = true;
+      try {
+        const res = await authFetch('/api/admin/client/extend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ client_id: clientId, days: days, lifetime: isLifetime })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
 
-      if (confirm(confirmMsg)) {
-        btn.disabled = true;
-        try {
-          const res = await authFetch('/api/admin/client/extend', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ client_id: clientId, days: days, lifetime: isLifetime })
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error);
-          showToast(data.message || 'Gia hạn thành công!');
-          loadDashboard();
-        } catch (err) {
-          showToast(err.message, false);
-        } finally {
-          btn.disabled = false;
-        }
+        showToast(isLifetime ? 'Đã kích hoạt VĨNH VIỄN!' : `Đã gia hạn thành công +${days} ngày!`);
+        loadDashboard();
+      } catch (err) {
+        showToast(err.message, false);
+      } finally {
+        btn.disabled = false;
       }
-    } else if (action === 'toggle-block') {
+    } 
+    // 3. Block/Unblock: INSTANT 1-CLICK
+    else if (action === 'toggle-block') {
       const newStatus = btn.dataset.status;
       const isBlock = (newStatus === 'blocked');
-      if (confirm(isBlock ? `Xác nhận KHÓA thiết bị ${clientId}?` : `Xác nhận MỞ KHÓA cho thiết bị ${clientId}?`)) {
-        try {
-          const res = await authFetch('/api/admin/client/status', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ client_id: clientId, status: newStatus })
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error);
-          showToast(isBlock ? 'Đã khóa thiết bị!' : 'Đã mở khóa thiết bị!');
-          loadDashboard();
-        } catch (err) {
-          showToast(err.message, false);
-        }
+      try {
+        const res = await authFetch('/api/admin/client/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ client_id: clientId, status: newStatus })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        showToast(isBlock ? 'Đã khóa thiết bị!' : 'Đã mở khóa thiết bị!');
+        loadDashboard();
+      } catch (err) {
+        showToast(err.message, false);
       }
-    } else if (action === 'delete') {
-      if (confirm(`Bạn có chắc chắn muốn XÓA khách hàng ${clientId} khỏi danh sách?`)) {
-        try {
-          const res = await authFetch('/api/admin/client/delete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ client_id: clientId })
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error);
-          showToast('Đã xóa khách hàng thành công!');
-          loadDashboard();
-        } catch (err) {
-          showToast(err.message, false);
-        }
-      }
+    } 
+    // 4. Delete client: Custom Glassmorphism Confirmation Modal (NO native browser confirm!)
+    else if (action === 'delete') {
+      showCustomConfirm(
+        'Xóa Khách Hàng',
+        `Bạn có chắc chắn muốn xóa khách hàng ${clientId} khỏi danh sách?`,
+        async () => {
+          try {
+            const res = await authFetch('/api/admin/client/delete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ client_id: clientId })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            showToast('Đã xóa khách hàng thành công!');
+            loadDashboard();
+          } catch (err) {
+            showToast(err.message, false);
+          }
+        },
+        true
+      );
     }
   });
+
+  // ==========================================
+  // INLINE NAME EDITING (Directly in table)
+  // ==========================================
+  function startInlineEdit(clientId, initialName) {
+    const rowEl = document.getElementById(`nameRow_${clientId}`);
+    if (!rowEl) return;
+
+    rowEl.innerHTML = `
+      <div class="inline-edit-wrap">
+        <input type="text" class="inline-edit-input" id="inlineInput_${clientId}" value="${escapeHtml(initialName)}" placeholder="Nhập tên khách...">
+        <button class="btn-save-inline" id="btnSaveInline_${clientId}" title="Lưu (Enter)"><i class="fa-solid fa-check"></i></button>
+        <button class="btn-cancel-inline" id="btnCancelInline_${clientId}" title="Hủy (Esc)"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    `;
+
+    const input = document.getElementById(`inlineInput_${clientId}`);
+    const btnSave = document.getElementById(`btnSaveInline_${clientId}`);
+    const btnCancel = document.getElementById(`btnCancelInline_${clientId}`);
+
+    input.focus();
+    input.select();
+
+    let isSubmitting = false;
+
+    async function saveEdit() {
+      if (isSubmitting) return;
+      const newName = input.value.trim();
+      if (!newName || newName === initialName) {
+        cancelEdit();
+        return;
+      }
+      isSubmitting = true;
+      btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+      try {
+        const res = await authFetch('/api/admin/client/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ client_id: clientId, name: newName })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        showToast(`Đã đổi tên thành: ${newName}`);
+        // Update cache locally for immediate responsiveness
+        if (dashboardCache && dashboardCache.clients) {
+          const target = dashboardCache.clients.find(c => c.client_id === clientId);
+          if (target) target.name = newName;
+        }
+        renderClientsTable();
+      } catch (err) {
+        showToast(err.message, false);
+        cancelEdit();
+      }
+    }
+
+    function cancelEdit() {
+      rowEl.innerHTML = `
+        <span class="client-name-text" data-action="rename" data-id="${clientId}" data-name="${escapeHtml(initialName)}" title="Bấm vào để đổi tên trực tiếp">${escapeHtml(initialName)}</span>
+        <button class="btn-edit-name" data-action="rename" data-id="${clientId}" data-name="${escapeHtml(initialName)}" title="Đổi tên ghi chú"><i class="fa-solid fa-pen"></i></button>
+      `;
+    }
+
+    btnSave.addEventListener('click', (e) => {
+      e.stopPropagation();
+      saveEdit();
+    });
+
+    btnCancel.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cancelEdit();
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveEdit();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        cancelEdit();
+      }
+    });
+  }
 
   // Render Keys Table
   function renderKeysTable(keys) {
@@ -570,7 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/[&<>"']/g, (m) => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&custom;', "'": '&#39;'
     })[m]);
   }
 
