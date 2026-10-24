@@ -552,19 +552,48 @@ document.addEventListener('DOMContentLoaded', () => {
               : `<span class="status-pill active"><span class="dot"></span> Chưa sử dụng</span>`}
           </td>
           <td>${k.used_by || '—'}</td>
+          <td class="text-right">
+            <button class="btn-del-client btn-del-key" data-key="${k.key}" title="Xóa mã này"><i class="fa-solid fa-trash-can"></i></button>
+          </td>
         </tr>
       `;
     }).join('');
   }
 
-  // Copy code from keys table
+  // Keys table action delegation (Copy & Delete)
   keysTableBody.addEventListener('click', (e) => {
-    const btn = e.target.closest('.btn-copy-code');
-    if (btn) {
-      const code = btn.dataset.code;
+    const copyBtn = e.target.closest('.btn-copy-code');
+    if (copyBtn) {
+      const code = copyBtn.dataset.code;
       navigator.clipboard.writeText(code).then(() => {
         showToast(`Đã sao chép mã: ${code}`);
       });
+      return;
+    }
+
+    const delBtn = e.target.closest('.btn-del-key');
+    if (delBtn) {
+      const keyCode = delBtn.dataset.key;
+      showCustomConfirm(
+        'Xóa Mã Kích Hoạt',
+        `Bạn có chắc chắn muốn xóa mã ${keyCode}?`,
+        async () => {
+          try {
+            const res = await authFetch('/api/admin/keys/delete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ key: keyCode })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error);
+            showToast(`Đã xóa mã ${keyCode} thành công!`);
+            loadDashboard();
+          } catch (err) {
+            showToast(err.message, false);
+          }
+        },
+        true
+      );
     }
   });
 

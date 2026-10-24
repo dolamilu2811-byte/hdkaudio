@@ -307,6 +307,14 @@ class LicenseManager:
         self.save_all()
         return key_code
 
+    def delete_key(self, key_code):
+        key_code = key_code.strip().upper()
+        if key_code in self.keys:
+            del self.keys[key_code]
+            self.save_all()
+            return True, "Đã xóa mã kích hoạt thành công!"
+        return False, "Không tìm thấy mã kích hoạt!"
+
     def activate_key_for_client(self, client_id, key_code):
         key_code = key_code.strip().upper()
         if key_code not in self.keys:

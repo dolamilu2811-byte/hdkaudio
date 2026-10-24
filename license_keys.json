@@ -50,5 +50,24 @@
     "used_at": 1792810922,
     "created_at_str": "24/10/2026 10:01",
     "used_at_str": "24/10/2026 10:02"
+  },
+  "HDK-30D-31133F": {
+    "key": "HDK-30D-31133F",
+    "days": 30,
+    "note": "",
+    "created_at": 1792811488,
+    "used": false,
+    "used_by": null,
+    "used_at": null,
+    "created_at_str": "24/10/2026 10:11"
+  },
+  "HDK-7D-3DEB4C": {
+    "key": "HDK-7D-3DEB4C",
+    "days": 7,
+    "note": "To be deleted",
+    "created_at": 1792811528,
+    "used": false,
+    "used_by": null,
+    "used_at": null
   }
 }
