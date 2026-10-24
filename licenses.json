@@ -1,0 +1,14 @@
+{
+  "HDK-TESTCLIENT01": {
+    "client_id": "HDK-TESTCLIENT01",
+    "name": "Khách mới (IENT01)",
+    "ip": "127.0.0.1",
+    "user_agent": "Python-urllib/3.12",
+    "created_at": 1792810532,
+    "expires_at": 1796093732,
+    "status": "active",
+    "is_lifetime": false,
+    "download_count": 0,
+    "last_active": 1792810552
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "HDK-30D-3197E4": {
+    "key": "HDK-30D-3197E4",
+    "days": 30,
+    "note": "Test Key",
+    "created_at": 1792810552,
+    "used": true,
+    "used_by": "HDK-TESTCLIENT01",
+    "used_at": 1792810552
+  }
+}

@@ -1,12 +1,12 @@
 ﻿@echo off
 chcp 65001 >nul
-title SONIC EXTRACT - Trình Xuất Âm Thanh YouTube Cá Nhân
+title HDK MEDIA - Tai Video Facebook & YouTube Full HD 1080p
 color 0B
 
 echo ===================================================================
-echo               🎵 SONIC EXTRACT - STUDIO ÂM NHẠC CÁ NHÂN 🎵
+echo        🎬 HDK MEDIA - TAI VIDEO FACEBOOK & YOUTUBE FULL HD 🎬
 echo ===================================================================
-echo [1/3] Đang kiểm tra môi trường chạy...
+echo [1/3] Dang kiem tra moi truong chay...
 
 set "PYTHON_EXE=C:\Users\HDK\AppData\Local\Programs\Python\Python312\python.exe"
 
@@ -14,8 +14,8 @@ if not exist "%PYTHON_EXE%" (
     set "PYTHON_EXE=python"
 )
 
-echo [2/3] Đang khởi động Server cục bộ tại http://localhost:5000 ...
-echo [3/3] Đang tự động mở trình duyệt web...
+echo [2/3] Dang khoi dong Server tai http://localhost:5000 ...
+echo [3/3] Dang tu dong mo trinh duyet web...
 
 start "" "http://localhost:5000"
 

@@ -1,16 +1,16 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>HDK AUDIO - Trích Xuất Âm Thanh YouTube Trực Tuyến</title>
-  <meta name="description" content="Công cụ chuyển đổi và tải nhạc YouTube chất lượng cao MP3 320kbps trực tuyến.">
+  <title>HDK MEDIA - Tải Video Facebook & YouTube Full HD 1080p</title>
+  <meta name="description" content="Công cụ tải video Facebook Reel, Watch và YouTube Full HD 1080p, trích xuất nhạc MP3 320kbps trực tuyến tốc độ cao.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="/static/style.css?v=5.0">
+  <link rel="stylesheet" href="/static/style.css?v=9.0">
 </head>
 
 <body>
@@ -33,36 +33,55 @@
           </div>
         </div>
         <div class="brand-text">
-          <h1>HDK<span>AUDIO</span></h1>
-          <p class="tagline">Tải Nhạc Chất Lượng Cao Từ YouTube</p>
+          <h1>HDK<span>MEDIA</span></h1>
+          <p class="tagline">Tải Video Facebook Reel & YouTube Full HD 1080p</p>
         </div>
       </div>
       <div class="header-badges">
-        <span id="systemStatusBadge" class="badge-status online"><span class="dot"></span> Tải Nhạc Siêu Tốc</span>
+        <button id="btnHeaderCookie" class="badge-app-download" style="cursor: pointer; border: none;" title="Cài đặt Cookie Facebook">
+          <i class="fa-solid fa-cookie-bite"></i> Cookie Facebook
+        </button>
+        <button id="btnLicenseBadge" class="badge-license-pill" style="cursor: pointer;" title="Bản quyền & Hạn dùng">
+          <i class="fa-solid fa-shield-halved"></i> <span id="licenseBadgeText">Bản quyền: Đang kiểm tra...</span>
+        </button>
+        <span id="systemStatusBadge" class="badge-status online"><span class="dot"></span> Tải Siêu Tốc 1080p</span>
       </div>
     </header>
 
-        <!-- Main Content Area -->
+    <!-- Main Content Area -->
     <main class="main-content">
+      <!-- Master Kill-Switch Warning Banner -->
+      <div id="systemLockedBanner" class="system-locked-banner hidden">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <div class="locked-text">
+          <strong id="lockedBannerTitle">HỆ THỐNG ĐANG TẠM KHÓA</strong>
+          <span id="lockedBannerMsg">Hệ thống đang tạm bảo trì bởi Quản trị viên. Vui lòng liên hệ Admin qua SĐT/Zalo: 037.2222.700</span>
+        </div>
+      </div>
       <!-- Desktop Promo Banner -->
       <div class="desktop-promo-card">
         <div class="promo-badge"><i class="fa-solid fa-bolt-lightning"></i> KHUYÊN DÙNG CHO MÁY TÍNH</div>
         <div class="promo-body">
           <div class="promo-info">
-            <h3>Tải Bản HDK Audio Cho Máy Tính (Windows)</h3>
-            <p>Tải không giới hạn video dài 1–5 tiếng, mix nhạc, liveshow tốc độ 100 MB/s, 100% không bị YouTube chặn!</p>
+            <h3>Tải Bản HDK Media Cho Máy Tính (Windows)</h3>
+            <p>Tải không giới hạn video Facebook Reel, YouTube 1080p, dài 1–5 tiếng, tốc độ 100 MB/s, 100% không bị chặn!</p>
           </div>
           <a href="/download-app" class="btn-promo-dl">
             <i class="fa-solid fa-cloud-arrow-down"></i> Tải Về Máy Tính (.zip)
           </a>
         </div>
       </div>
+
       <!-- Input Card -->
       <section class="glass-card input-card">
         <div class="card-glow-edge"></div>
         <div class="input-section-header">
-          <h2><i class="fa-brands fa-youtube icon-yt"></i> Dán link YouTube vào đây</h2>
-          <span class="hint-pill">Video, Shorts & Âm nhạc</span>
+          <h2>
+            <i class="fa-brands fa-youtube icon-yt"></i>
+            <i class="fa-brands fa-facebook icon-fb"></i>
+            Dán link YouTube hoặc Facebook vào đây
+          </h2>
+          <span class="hint-pill">Reel, Watch, Shorts & Full HD</span>
         </div>
 
         <div class="url-input-group">
@@ -70,18 +89,10 @@
             <div class="input-prefix-icon">
               <i class="fa-solid fa-link"></i>
             </div>
-            <input 
-              type="text" 
-              id="urlInput" 
-              placeholder="Dán link YouTube (Ctrl + V)..." 
-              autocomplete="off"
-              spellcheck="false"
-            >
-            <button id="btnClear" class="input-action-btn btn-clear hidden" title="Xóa link">
+            <input type="url" id="urlInput" placeholder="Dán link Facebook (Reel, Video) hoặc YouTube tại đây..." autocomplete="off" spellcheck="false">
+            <button id="btnClear" class="btn-icon-clear hidden" title="Xóa link">
               <i class="fa-solid fa-xmark"></i>
             </button>
-          </div>
-          <div class="url-input-actions">
             <button id="btnPaste" class="btn-paste" title="Dán từ Clipboard">
               <i class="fa-regular fa-clipboard"></i> Dán Link
             </button>
@@ -95,7 +106,12 @@
         <!-- Notification / Error Box -->
         <div id="notifyBox" class="notify-box hidden">
           <i class="fa-solid fa-circle-exclamation notify-icon"></i>
-          <span id="notifyMsg"></span>
+          <div class="notify-body" style="flex: 1;">
+            <span id="notifyMsg"></span>
+            <div id="notifyActionBox" class="notify-actions" style="margin-top: 6px;">
+              <button id="btnOpenCookieModal" class="btn-cookie-action"><i class="fa-solid fa-cookie-bite"></i> Nhập Cookie Facebook Ngay (15s)</button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -109,13 +125,13 @@
               <img id="videoThumb" src="" alt="Thumbnail" loading="lazy">
               <span id="videoDuration" class="duration-badge">00:00</span>
               <div class="thumb-hover-overlay">
-                <i class="fa-solid fa-music play-icon-overlay"></i>
+                <i id="previewIconOverlay" class="fa-solid fa-play play-icon-overlay"></i>
               </div>
             </div>
             <div class="video-meta">
               <h3 id="videoTitle" class="video-title">Tên video đang tải...</h3>
               <div class="video-submeta">
-                <span class="channel-name"><i class="fa-solid fa-circle-check"></i> <span id="videoChannel">Kênh YouTube</span></span>
+                <span class="channel-name"><i id="platformBadgeIcon" class="fa-brands fa-youtube"></i> <span id="videoChannel">Kênh</span></span>
                 <span class="bullet">•</span>
                 <span class="views-count"><i class="fa-regular fa-eye"></i> <span id="videoViews">0</span> lượt xem</span>
               </div>
@@ -127,26 +143,32 @@
             <div class="settings-grid">
               <!-- Format Selector -->
               <div class="setting-item">
-                <label for="formatSelect"><i class="fa-solid fa-file-audio"></i> Định dạng âm thanh</label>
+                <label for="formatSelect"><i class="fa-solid fa-film"></i> Định dạng muốn tải</label>
                 <div class="custom-select-wrap">
                   <select id="formatSelect">
-                    <option value="mp3" selected>MP3 (Phổ biến nhất)</option>
-                    <option value="m4a">M4A / AAC (Chuẩn Apple)</option>
-                    <option value="wav">WAV (Không nén Studio)</option>
-                    <option value="flac">FLAC (Lossless)</option>
+                    <optgroup label="🎬 VIDEO FULL HD (Hình ảnh & Âm thanh)">
+                      <option value="mp4-1080" selected>MP4 Video Full HD (1080p - Nét nhất)</option>
+                      <option value="mp4-720">MP4 Video HD (720p)</option>
+                      <option value="mp4-best">MP4 Video (Gốc cao nhất)</option>
+                    </optgroup>
+                    <optgroup label="🎵 ÂM THANH (Chỉ bóc tách nhạc)">
+                      <option value="mp3">MP3 Nhạc (320 kbps - Cực nét)</option>
+                      <option value="m4a">M4A / AAC (Chuẩn Apple)</option>
+                      <option value="wav">WAV (Không nén Studio)</option>
+                      <option value="flac">FLAC (Lossless)</option>
+                    </optgroup>
                   </select>
                 </div>
               </div>
 
               <!-- Quality Selector -->
-              <div class="setting-item">
-                <label for="qualitySelect"><i class="fa-solid fa-sliders"></i> Chất lượng Bitrate</label>
+              <div class="setting-item" id="qualitySettingWrap">
+                <label id="qualityLabel" for="qualitySelect"><i class="fa-solid fa-sliders"></i> Độ phân giải video</label>
                 <div class="custom-select-wrap">
                   <select id="qualitySelect">
-                    <option value="320" selected>320 kbps (Cực nét - Khuyên dùng)</option>
-                    <option value="256">256 kbps (Rất cao)</option>
-                    <option value="192">192 kbps (Chuẩn CD)</option>
-                    <option value="128">128 kbps (Tiết kiệm bộ nhớ)</option>
+                    <option value="1080" selected>Full HD 1080p (Nét nhất)</option>
+                    <option value="720">HD 720p (Chuẩn)</option>
+                    <option value="best">Chất lượng gốc cao nhất</option>
                   </select>
                 </div>
               </div>
@@ -157,7 +179,7 @@
               <label class="custom-toggle">
                 <input type="checkbox" id="chkEmbedThumb" checked>
                 <span class="toggle-slider"></span>
-                <span class="toggle-label"><i class="fa-regular fa-image"></i> Gắn ảnh bìa & ID3 Tag vào file</span>
+                <span class="toggle-label"><i class="fa-regular fa-image"></i> Gắn ảnh bìa & Tag thông tin vào file</span>
               </label>
             </div>
 
@@ -166,7 +188,7 @@
               <div class="btn-primary-bg"></div>
               <span class="btn-content">
                 <i class="fa-solid fa-bolt-lightning"></i>
-                <span class="action-text">BẮT ĐẦU XUẤT NHẠC</span>
+                <span id="btnStartDownloadText" class="action-text">BẮT ĐẦU TẢI VIDEO FULL HD</span>
               </span>
             </button>
           </div>
@@ -181,7 +203,7 @@
             <div class="spinner-neon"></div>
             <div>
               <h3 id="progressStatusText">Đang chuẩn bị tiến trình...</h3>
-              <p id="progressDetailText" class="progress-details">Đang kết nối YouTube</p>
+              <p id="progressDetailText" class="progress-details">Đang kết nối máy chủ</p>
             </div>
           </div>
           <div class="percent-display">
@@ -202,25 +224,36 @@
         </div>
       </section>
 
-      <!-- Completed & Audio Player Card -->
+      <!-- Completed & Media Player Card -->
       <section id="resultCard" class="glass-card result-card hidden">
         <div class="card-glow-edge"></div>
         <div class="result-header">
           <div class="success-badge">
             <i class="fa-solid fa-circle-check"></i>
-            <span>Đã tạo file nhạc thành công!</span>
+            <span id="resultSuccessTitle">Đã tải xong video Full HD!</span>
           </div>
           <span class="storage-notice"><i class="fa-solid fa-shield-halved"></i> Tải trực tiếp về thiết bị</span>
         </div>
 
         <div class="player-container">
           <div class="player-info">
-            <i class="fa-solid fa-compact-disc disc-spinning"></i>
-            <span id="resultFileName" class="result-filename">ten_bai_hat.mp3</span>
+            <i id="resultMediaIcon" class="fa-solid fa-film disc-spinning"></i>
+            <span id="resultFileName" class="result-filename">video_fullhd.mp4</span>
           </div>
-          <audio id="audioPlayer" controls preload="metadata">
-            Trình duyệt của bạn không hỗ trợ audio element.
-          </audio>
+          
+          <!-- Video Player Box -->
+          <div id="videoPlayerBox" class="video-player-wrap">
+            <video id="videoPlayer" controls playsinline preload="metadata">
+              Trình duyệt của bạn không hỗ trợ video element.
+            </video>
+          </div>
+
+          <!-- Audio Player Box -->
+          <div id="audioPlayerBox" class="audio-player-wrap hidden">
+            <audio id="audioPlayer" controls preload="metadata">
+              Trình duyệt của bạn không hỗ trợ audio element.
+            </audio>
+          </div>
         </div>
 
         <div class="result-actions">
@@ -228,7 +261,7 @@
             <i class="fa-solid fa-cloud-arrow-down"></i> TẢI VỀ THIẾT BỊ NGAY
           </a>
           <button id="btnConvertAnother" class="btn-action btn-secondary-action">
-            <i class="fa-solid fa-plus"></i> Xuất Bài Khác
+            <i class="fa-solid fa-plus"></i> Tải Video / Bài Khác
           </button>
         </div>
       </section>
@@ -238,8 +271,8 @@
         <div class="card-glow-edge"></div>
         <div class="history-header">
           <div class="history-title-group">
-            <h3><i class="fa-solid fa-clock-rotate-left"></i> Các bài vừa tải</h3>
-            <span id="historyCountBadge" class="count-badge">0 bài</span>
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> Các video & bài vừa tải</h3>
+            <span id="historyCountBadge" class="count-badge">0 mục</span>
           </div>
           <div class="history-actions-group">
             <button id="btnClearHistory" class="btn-glass-sm" title="Xóa lịch sử phiên">
@@ -250,21 +283,104 @@
 
         <div id="historyList" class="history-list">
           <div class="empty-state">
-            <i class="fa-solid fa-music empty-icon"></i>
-            <p>Chưa có bài hát nào được tải trong phiên này.</p>
-            <span>Dán link phía trên để bắt đầu xuất bài hát đầu tiên!</span>
+            <i class="fa-solid fa-film empty-icon"></i>
+            <p>Chưa có video hoặc bài hát nào được tải trong phiên này.</p>
+            <span>Dán link Facebook hoặc YouTube phía trên để bắt đầu tải!</span>
           </div>
         </div>
       </section>
     </main>
 
+    <!-- Modal Cookie Facebook -->
+    <div id="cookieModal" class="cookie-modal-overlay hidden">
+      <div class="cookie-modal-box">
+        <div class="modal-header">
+          <h3><i class="fa-solid fa-cookie-bite" style="color: #00dfd8;"></i> Nhập Cookie Facebook</h3>
+          <button id="btnCloseCookieModal" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">
+            Video nhóm hoặc riêng tư cần Cookie tài khoản của bạn để tải Full HD. Lấy 2 mã này trên Cốc Cốc chỉ mất 15 giây:
+          </p>
+          <div class="guide-steps">
+            <span>1. Mở tab Facebook trên Cốc Cốc, bấm phím <b>F12</b></span><br>
+            <span>2. Chọn tab <b>Application</b> (hoặc Ứng dụng) ➔ Cột trái bấm <b>Cookies</b> ➔ <code>https://www.facebook.com</code></span><br>
+            <span>3. Copy 2 giá trị <b>c_user</b> và <b>xs</b> dán vào bên dưới:</span>
+          </div>
+          <div class="cookie-inputs-grid">
+            <div class="cookie-field">
+              <label>Giá trị <code>c_user</code> (ID tài khoản):</label>
+              <input type="text" id="inputCUser" placeholder="Dán c_user (ví dụ: 1000...)">
+            </div>
+            <div class="cookie-field">
+              <label>Giá trị <code>xs</code> (Token phiên):</label>
+              <input type="text" id="inputXs" placeholder="Dán xs">
+            </div>
+          </div>
+          <div class="cookie-field" style="margin-top: 10px;">
+            <label>Hoặc dán toàn bộ chuỗi Cookie / file Netscape:</label>
+            <textarea id="inputCookieRaw" rows="2" placeholder="Dán c_user=...; xs=... vào đây nếu có"></textarea>
+          </div>
+          <button id="btnSaveCookieModal" class="btn-primary-action" style="margin-top: 14px; padding: 12px;">
+            <div class="btn-primary-bg"></div>
+            <span class="btn-content"><i class="fa-solid fa-floppy-disk"></i> LƯU COOKIE FACEBOOK</span>
+          </button>
+          <div id="modalCookieMsg" class="modal-msg hidden"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Footer -->
     <footer class="app-footer">
-      <p>Tải nhạc cá nhân từ YouTube được thực hiện bởi HDK — Liên hệ SĐT: <a href="tel:0372222700" style="color: #60a5fa; text-decoration: none; font-weight: 600;">037.2222.700</a></p>
+      <p>Tải video Facebook & YouTube Full HD được thực hiện bởi HDK — Liên hệ SĐT: <a href="tel:0372222700" style="color: #60a5fa; text-decoration: none; font-weight: 600;">037.2222.700</a></p>
     </footer>
   </div>
 
-  <script src="/static/app.js?v=5.0"></script>
+  <script src="/static/app.js?v=9.0"></script>
+
+    <!-- Modal License / Kich Hoat Ban Quyen -->
+    <div id="licenseModal" class="cookie-modal-overlay hidden">
+      <div class="cookie-modal-box">
+        <div class="modal-header">
+          <h3><i class="fa-solid fa-shield-halved" style="color: #00dfd8;"></i> Quản Lý Bản Quyền Thiết Bị</h3>
+          <button id="btnCloseLicenseModal" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="license-info-card">
+            <div class="lic-row">
+              <span class="lic-label">Mã thiết bị của bạn:</span>
+              <div class="lic-code-wrap">
+                <code id="displayMyClientId">HDK-XXXXXXXX</code>
+                <button id="btnCopyMyClientId" class="btn-copy-code" title="Sao chép gửi Admin"><i class="fa-regular fa-copy"></i> Copy</button>
+              </div>
+            </div>
+            <div class="lic-row">
+              <span class="lic-label">Thời gian sử dụng:</span>
+              <span id="displayMyTimeLeft" class="lic-value active">Đang kiểm tra...</span>
+            </div>
+            <div class="lic-row">
+              <span class="lic-label">Hạn kết thúc:</span>
+              <span id="displayMyExpiresAt" class="lic-sub">...</span>
+            </div>
+          </div>
+
+          <div class="activate-section">
+            <label for="inputLicenseKey"><b>Nhập Mã Kích Hoạt (Do Admin cấp):</b></label>
+            <div class="activate-input-row">
+              <input type="text" id="inputLicenseKey" placeholder="Ví dụ: HDK-30D-XXXX" style="text-transform: uppercase;">
+              <button id="btnSubmitKey" class="btn-activate-key"><i class="fa-solid fa-bolt"></i> KÍCH HOẠT</button>
+            </div>
+            <div id="modalLicenseMsg" class="modal-msg hidden"></div>
+          </div>
+
+          <div class="admin-support-box">
+            <p><i class="fa-solid fa-headset"></i> Cần gia hạn thêm theo tuần, tháng hoặc năm? Hãy gửi <b>Mã thiết bị</b> phía trên cho Admin:</p>
+            <a href="tel:0372222700" class="btn-call-admin"><i class="fa-solid fa-phone"></i> Gọi / Zalo Admin: 037.2222.700</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
 </body>
 
 </html>

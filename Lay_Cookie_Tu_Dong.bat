@@ -1,9 +1,9 @@
-@echo off
-title Lay Cookie YouTube Tu Coc Coc (HDK AUDIO)
+﻿@echo off
+title Lay Cookie YouTube & Facebook Tu Coc Coc (HDK)
 color 0B
 echo ==============================================================
-echo        CONG CU TU DONG LAY COOKIE YOUTUBE TU COC COC
-echo                  DANH CHO HDK AUDIO
+echo    CONG CU TU DONG LAY COOKIE YOUTUBE & FACEBOOK TU COC COC
+echo                  DANH CHO HDK TOOLS
 echo ==============================================================
 echo.
 echo Coc Coc dang chay va khoa file du lieu cookie cua no.
@@ -26,7 +26,7 @@ if "%opt%"=="1" (
     pause >nul
 )
 
-echo [*] Dang trich xuat va giai ma cookie YouTube tu Coc Coc...
+echo [*] Dang trich xuat va giai ma cookie YouTube & Facebook tu Coc Coc...
 set PATH=C:\Program Files\Git\cmd;%PATH%
 "C:\Users\HDK\AppData\Local\Programs\Python\Python312\python.exe" "E:\toolsvideo\trich_xuat_cookie.py"
 if %errorlevel% neq 0 (
@@ -50,14 +50,14 @@ echo [*] Dang dong bo cookie moi len GitHub de Render cap nhat...
 echo ==============================================================
 cd /d E:\toolsvideo
 git add cookies.txt
-git commit -m "Update authenticated YouTube cookies from Coc Coc"
+git commit -m "Update authenticated YouTube and Facebook cookies from Coc Coc"
 git push origin main
 
 echo.
 echo ==============================================================
 echo   THANH CONG RUC RO!
-echo   Render se tu dong cap nhat trang web sau 1 phut.
-echo   Sau do ban co the tai moi video dai tren dien thoai 24/7!
+echo   Da lay day du Cookie YouTube va Facebook!
+echo   Bay gio ban co the tai moi video/reel Facebook va YouTube!
 echo ==============================================================
 echo.
 pause

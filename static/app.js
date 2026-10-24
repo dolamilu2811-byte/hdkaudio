@@ -1,6 +1,173 @@
-// HDK AUDIO - Client Application Logic (Cloud / Direct-Download Mode)
+﻿// HDK MEDIA - Client Application Logic (Full HD Video & High Quality Audio)
 
 document.addEventListener('DOMContentLoaded', () => {
+
+  // ==========================================
+  // CLIENT LICENSE & MASTER SWITCH MANAGEMENT
+  // ==========================================
+  const CLIENT_ID_KEY = 'hdk_client_id_v2';
+  function getClientId() {
+    let cid = localStorage.getItem(CLIENT_ID_KEY);
+    if (!cid || cid.length < 8) {
+      const rand = Math.random().toString(36).substring(2, 8).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+      cid = 'HDK-' + rand;
+      localStorage.setItem(CLIENT_ID_KEY, cid);
+    }
+    return cid;
+  }
+  const myClientId = getClientId();
+
+  // License DOM Elements
+  const btnLicenseBadge = document.getElementById('btnLicenseBadge');
+  const licenseBadgeText = document.getElementById('licenseBadgeText');
+  const systemLockedBanner = document.getElementById('systemLockedBanner');
+  const lockedBannerMsg = document.getElementById('lockedBannerMsg');
+  const licenseModal = document.getElementById('licenseModal');
+  const btnCloseLicenseModal = document.getElementById('btnCloseLicenseModal');
+  const displayMyClientId = document.getElementById('displayMyClientId');
+  const displayMyTimeLeft = document.getElementById('displayMyTimeLeft');
+  const displayMyExpiresAt = document.getElementById('displayMyExpiresAt');
+  const btnCopyMyClientId = document.getElementById('btnCopyMyClientId');
+  const inputLicenseKey = document.getElementById('inputLicenseKey');
+  const btnSubmitKey = document.getElementById('btnSubmitKey');
+  const modalLicenseMsg = document.getElementById('modalLicenseMsg');
+
+  let currentLicenseState = null;
+
+  async function checkLicenseStatus(showAlertIfBlocked = false) {
+    try {
+      const res = await fetch(`/api/license/check?client_id=${myClientId}`);
+      const data = await res.json();
+      currentLicenseState = data;
+
+      if (displayMyClientId) displayMyClientId.textContent = myClientId;
+
+      if (!data.allowed) {
+        if (data.reason === 'system_locked') {
+          // Master Kill-Switch is OFF
+          if (systemLockedBanner) {
+            systemLockedBanner.classList.remove('hidden');
+            if (lockedBannerMsg) lockedBannerMsg.textContent = data.message || 'Hệ thống đang tạm khóa bởi Quản trị viên.';
+          }
+          if (licenseBadgeText) licenseBadgeText.textContent = 'Hệ thống: TẠM KHÓA';
+          if (btnLicenseBadge) btnLicenseBadge.className = 'badge-license-pill locked';
+          if (showAlertIfBlocked) {
+            showNotification(data.message || 'Hệ thống đang tạm khóa bởi Admin.', false);
+          }
+        } else {
+          // Client Expired or Blocked
+          if (systemLockedBanner) systemLockedBanner.classList.add('hidden');
+          if (licenseBadgeText) licenseBadgeText.textContent = 'Bản quyền: HẾT HẠN';
+          if (btnLicenseBadge) btnLicenseBadge.className = 'badge-license-pill expired';
+          if (displayMyTimeLeft) {
+            displayMyTimeLeft.textContent = 'Đã hết hạn';
+            displayMyTimeLeft.className = 'lic-value expired';
+          }
+          if (displayMyExpiresAt) {
+            displayMyExpiresAt.textContent = data.client ? (data.client.expires_at_str || '—') : '—';
+          }
+          if (showAlertIfBlocked) {
+            showNotification(data.message || 'Bản quyền của bạn đã hết hạn. Bấm vào huy hiệu Bản quyền góc trên để kích hoạt!', false);
+            openLicenseModal();
+          }
+        }
+        return false;
+      } else {
+        // Active
+        if (systemLockedBanner) systemLockedBanner.classList.add('hidden');
+        const timeLeftStr = data.time_left_str || 'Đang hoạt động';
+        if (licenseBadgeText) licenseBadgeText.textContent = `Bản quyền: ${timeLeftStr}`;
+        if (btnLicenseBadge) btnLicenseBadge.className = 'badge-license-pill';
+        if (displayMyTimeLeft) {
+          displayMyTimeLeft.textContent = timeLeftStr;
+          displayMyTimeLeft.className = 'lic-value active';
+        }
+        if (displayMyExpiresAt) {
+          displayMyExpiresAt.textContent = data.expires_at_str || 'Vĩnh viễn';
+        }
+        return true;
+      }
+    } catch (err) {
+      console.warn('License check error:', err);
+      return true;
+    }
+  }
+
+  function openLicenseModal() {
+    if (licenseModal) {
+      licenseModal.classList.remove('hidden');
+      if (modalLicenseMsg) modalLicenseMsg.classList.add('hidden');
+      checkLicenseStatus();
+    }
+  }
+
+  function closeLicenseModal() {
+    if (licenseModal) licenseModal.classList.add('hidden');
+  }
+
+  if (btnLicenseBadge) btnLicenseBadge.addEventListener('click', openLicenseModal);
+  if (btnCloseLicenseModal) btnCloseLicenseModal.addEventListener('click', closeLicenseModal);
+  if (licenseModal) {
+    licenseModal.addEventListener('click', (e) => {
+      if (e.target === licenseModal) closeLicenseModal();
+    });
+  }
+
+  if (btnCopyMyClientId) {
+    btnCopyMyClientId.addEventListener('click', () => {
+      navigator.clipboard.writeText(myClientId).then(() => {
+        btnCopyMyClientId.innerHTML = '<i class="fa-solid fa-check"></i> Đã chép!';
+        setTimeout(() => { btnCopyMyClientId.innerHTML = '<i class="fa-regular fa-copy"></i> Copy'; }, 2000);
+      });
+    });
+  }
+
+  if (btnSubmitKey) {
+    btnSubmitKey.addEventListener('click', async () => {
+      const keyVal = inputLicenseKey.value.trim();
+      if (!keyVal) {
+        modalLicenseMsg.textContent = 'Vui lòng nhập Mã Kích Hoạt (ví dụ: HDK-30D-XXXX)!';
+        modalLicenseMsg.className = 'modal-msg error';
+        modalLicenseMsg.classList.remove('hidden');
+        return;
+      }
+
+      btnSubmitKey.disabled = true;
+      btnSubmitKey.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang kích hoạt...';
+
+      try {
+        const res = await fetch('/api/license/activate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ client_id: myClientId, key: keyVal })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Mã không hợp lệ!');
+
+        modalLicenseMsg.textContent = data.message || 'Kích hoạt thành công!';
+        modalLicenseMsg.className = 'modal-msg success';
+        modalLicenseMsg.classList.remove('hidden');
+        inputLicenseKey.value = '';
+
+        await checkLicenseStatus();
+        setTimeout(() => {
+          closeLicenseModal();
+        }, 1500);
+      } catch (err) {
+        modalLicenseMsg.textContent = err.message;
+        modalLicenseMsg.className = 'modal-msg error';
+        modalLicenseMsg.classList.remove('hidden');
+      } finally {
+        btnSubmitKey.disabled = false;
+        btnSubmitKey.innerHTML = '<i class="fa-solid fa-bolt"></i> KÍCH HOẠT';
+      }
+    });
+  }
+
+  // Initial license check on page load
+  checkLicenseStatus();
+
+
   // DOM Elements
   const urlInput = document.getElementById('urlInput');
   const btnClear = document.getElementById('btnClear');
@@ -8,6 +175,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnFetchInfo = document.getElementById('btnFetchInfo');
   const notifyBox = document.getElementById('notifyBox');
   const notifyMsg = document.getElementById('notifyMsg');
+  const notifyActionBox = document.getElementById('notifyActionBox');
+  const btnOpenCookieModal = document.getElementById('btnOpenCookieModal');
+  const btnHeaderCookie = document.getElementById('btnHeaderCookie');
+
+  // Cookie Modal elements
+  const cookieModal = document.getElementById('cookieModal');
+  const btnCloseCookieModal = document.getElementById('btnCloseCookieModal');
+  const inputCUser = document.getElementById('inputCUser');
+  const inputXs = document.getElementById('inputXs');
+  const inputCookieRaw = document.getElementById('inputCookieRaw');
+  const btnSaveCookieModal = document.getElementById('btnSaveCookieModal');
+  const modalCookieMsg = document.getElementById('modalCookieMsg');
 
   // Preview elements
   const previewCard = document.getElementById('previewCard');
@@ -16,10 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const videoTitle = document.getElementById('videoTitle');
   const videoChannel = document.getElementById('videoChannel');
   const videoViews = document.getElementById('videoViews');
+  const platformBadgeIcon = document.getElementById('platformBadgeIcon');
   const formatSelect = document.getElementById('formatSelect');
   const qualitySelect = document.getElementById('qualitySelect');
+  const qualityLabel = document.getElementById('qualityLabel');
   const chkEmbedThumb = document.getElementById('chkEmbedThumb');
   const btnStartDownload = document.getElementById('btnStartDownload');
+  const btnStartDownloadText = document.getElementById('btnStartDownloadText');
 
   // Progress elements
   const progressCard = document.getElementById('progressCard');
@@ -31,9 +213,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const progressSpeed = document.getElementById('progressSpeed');
   const progressEta = document.getElementById('progressEta');
 
-  // Result & Player elements
+  // Result & Media Player elements
   const resultCard = document.getElementById('resultCard');
+  const resultSuccessTitle = document.getElementById('resultSuccessTitle');
   const resultFileName = document.getElementById('resultFileName');
+  const resultMediaIcon = document.getElementById('resultMediaIcon');
+  const videoPlayerBox = document.getElementById('videoPlayerBox');
+  const videoPlayer = document.getElementById('videoPlayer');
+  const audioPlayerBox = document.getElementById('audioPlayerBox');
   const audioPlayer = document.getElementById('audioPlayer');
   const btnDownloadBrowser = document.getElementById('btnDownloadBrowser');
   const btnConvertAnother = document.getElementById('btnConvertAnother');
@@ -49,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let timerInterval = null;
 
   // Session storage key
-  const STORAGE_KEY = 'hdk_audio_session_history';
+  const STORAGE_KEY = 'hdk_media_session_history_v2';
 
   function getSessionHistory() {
     try {
@@ -63,10 +250,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function saveSessionItem(item) {
     try {
       let history = getSessionHistory();
-      // Remove duplicate if exists
       history = history.filter(h => h.filename !== item.filename);
       history.unshift(item);
-      if (history.length > 20) history.pop();
+      if (history.length > 25) history.pop();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
       renderSessionHistory();
     } catch (e) {
@@ -80,14 +266,91 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Notification helper
-  function showNotification(msg, isSuccess = false) {
+  function showNotification(msg, isSuccess = false, showCookieBtn = false) {
     notifyMsg.textContent = msg;
     notifyBox.className = 'notify-box ' + (isSuccess ? 'success' : '');
+    if (showCookieBtn && notifyActionBox) {
+      notifyActionBox.classList.remove('hidden');
+    } else if (notifyActionBox) {
+      notifyActionBox.classList.add('hidden');
+    }
     notifyBox.classList.remove('hidden');
+    notifyBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function hideNotification() {
     notifyBox.classList.add('hidden');
+  }
+
+  // Cookie Modal Handlers
+  function openCookieModal() {
+    if (cookieModal) {
+      cookieModal.classList.remove('hidden');
+      if (modalCookieMsg) modalCookieMsg.classList.add('hidden');
+    }
+  }
+
+  function closeCookieModal() {
+    if (cookieModal) {
+      cookieModal.classList.add('hidden');
+    }
+  }
+
+  if (btnOpenCookieModal) btnOpenCookieModal.addEventListener('click', openCookieModal);
+  if (btnHeaderCookie) btnHeaderCookie.addEventListener('click', openCookieModal);
+  if (btnCloseCookieModal) btnCloseCookieModal.addEventListener('click', closeCookieModal);
+
+  if (cookieModal) {
+    cookieModal.addEventListener('click', (e) => {
+      if (e.target === cookieModal) closeCookieModal();
+    });
+  }
+
+  if (btnSaveCookieModal) {
+    btnSaveCookieModal.addEventListener('click', async () => {
+      const c_user = inputCUser.value.trim();
+      const xs = inputXs.value.trim();
+      const cookie_raw = inputCookieRaw.value.trim();
+
+      if (!cookie_raw && (!c_user || !xs)) {
+        modalCookieMsg.textContent = 'Vui lòng nhập cả c_user và xs (hoặc dán toàn bộ cookie)!';
+        modalCookieMsg.className = 'modal-msg error';
+        modalCookieMsg.classList.remove('hidden');
+        return;
+      }
+
+      btnSaveCookieModal.disabled = true;
+      btnSaveCookieModal.innerHTML = '<span class="btn-content"><i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...</span>';
+
+      try {
+        const res = await fetch('/api/save-cookie', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ c_user, xs, cookie_raw })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Lỗi lưu cookie');
+
+        modalCookieMsg.textContent = 'Đã lưu Cookie Facebook thành công!';
+        modalCookieMsg.className = 'modal-msg success';
+        modalCookieMsg.classList.remove('hidden');
+
+        setTimeout(() => {
+          closeCookieModal();
+          btnSaveCookieModal.disabled = false;
+          btnSaveCookieModal.innerHTML = '<span class="btn-content"><i class="fa-solid fa-floppy-disk"></i> LƯU COOKIE FACEBOOK</span>';
+          if (urlInput.value.trim()) {
+            fetchVideoInfo();
+          }
+        }, 1000);
+      } catch (err) {
+        btnSaveCookieModal.disabled = false;
+        btnSaveCookieModal.innerHTML = '<span class="btn-content"><i class="fa-solid fa-floppy-disk"></i> LƯU COOKIE FACEBOOK</span>';
+        modalCookieMsg.textContent = err.message;
+        modalCookieMsg.className = 'modal-msg error';
+        modalCookieMsg.classList.remove('hidden');
+      }
+    });
   }
 
   // URL input handler
@@ -126,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchVideoInfo();
       } else {
         urlInput.focus();
-        showNotification('Bộ nhớ tạm (Clipboard) đang trống. Hãy copy link YouTube trước rồi dán vào đây.');
+        showNotification('Bộ nhớ tạm (Clipboard) đang trống. Hãy copy link YouTube hoặc Facebook trước rồi dán vào đây.');
       }
     } catch (err) {
       urlInput.focus();
@@ -134,19 +397,59 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Fetch Video Info with strict timeout
+  // Format selection change handler
+  formatSelect.addEventListener('change', () => {
+    const val = formatSelect.value;
+    if (val.startsWith('mp4')) {
+      qualityLabel.innerHTML = '<i class="fa-solid fa-sliders"></i> Độ phân giải video';
+      qualitySelect.innerHTML = `
+        <option value="1080" ${val === 'mp4-1080' ? 'selected' : ''}>Full HD 1080p (Nét nhất)</option>
+        <option value="720" ${val === 'mp4-720' ? 'selected' : ''}>HD 720p (Nhanh nhẹ)</option>
+        <option value="best" ${val === 'mp4-best' ? 'selected' : ''}>Chất lượng gốc cao nhất</option>
+      `;
+      btnStartDownloadText.textContent = 'BẮT ĐẦU TẢI VIDEO FULL HD';
+    } else {
+      qualityLabel.innerHTML = '<i class="fa-solid fa-sliders"></i> Chất lượng Bitrate âm thanh';
+      qualitySelect.innerHTML = `
+        <option value="320" selected>320 kbps (Cực nét - Khuyên dùng)</option>
+        <option value="256">256 kbps (Rất cao)</option>
+        <option value="192">192 kbps (Chuẩn CD)</option>
+        <option value="128">128 kbps (Tiết kiệm bộ nhớ)</option>
+      `;
+      btnStartDownloadText.textContent = `BẮT ĐẦU XUẤT NHẠC ${val.toUpperCase()}`;
+    }
+  });
+
+  // Fetch Video Info
   async function fetchVideoInfo() {
     const rawUrl = urlInput.value.trim();
     if (!rawUrl) {
-      showNotification('Vui lòng nhập hoặc dán link video YouTube vào ô trên!');
+      showNotification('Vui lòng nhập hoặc dán link video Facebook hoặc YouTube vào ô trên!');
       urlInput.focus();
       return;
     }
 
-    if (!rawUrl.includes('http://') && !rawUrl.includes('https://') && !rawUrl.includes('youtu')) {
-      showNotification('Vui lòng nhập một đường link YouTube hợp lệ (ví dụ: https://www.youtube.com/watch?v=...)');
+    const isHttp = rawUrl.includes('http://') || rawUrl.includes('https://');
+    const isSupported = rawUrl.includes('youtu') || rawUrl.includes('facebook.com') || rawUrl.includes('fb.watch') || rawUrl.includes('fb.com');
+
+    if (!isHttp && !isSupported) {
+      showNotification('Vui lòng nhập link YouTube hoặc Facebook hợp lệ (ví dụ: https://www.facebook.com/reel/... hoặc https://youtube.com/...)');
       urlInput.focus();
       return;
+    }
+
+    // Reset and hide old results immediately
+    resultCard.classList.add('hidden');
+    progressCard.classList.add('hidden');
+    if (videoPlayer) {
+      videoPlayer.pause();
+      videoPlayer.removeAttribute('src');
+      videoPlayer.load();
+    }
+    if (audioPlayer) {
+      audioPlayer.pause();
+      audioPlayer.removeAttribute('src');
+      audioPlayer.load();
     }
 
     hideNotification();
@@ -167,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch('/api/info', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: rawUrl }),
+        body: JSON.stringify({ url: rawUrl, client_id: myClientId }),
         signal: controller.signal
       });
 
@@ -181,11 +484,18 @@ document.addEventListener('DOMContentLoaded', () => {
       currentVideoData = data;
 
       // Populate preview
-      videoThumb.src = data.thumbnail || 'https://via.placeholder.com/640x360?text=No+Thumbnail';
+      videoThumb.src = data.thumbnail || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=640&q=80';
       videoDuration.textContent = data.duration_str || '00:00';
-      videoTitle.textContent = data.title || 'Không có tiêu đề';
-      videoChannel.textContent = data.uploader || 'YouTube';
-      videoViews.textContent = data.view_count || '0';
+      videoTitle.textContent = data.title || 'Video Facebook';
+      videoViews.textContent = data.view_count || 'N/A';
+
+      if (data.platform === 'facebook') {
+        videoChannel.textContent = data.uploader || 'Facebook';
+        if (platformBadgeIcon) platformBadgeIcon.className = 'fa-brands fa-facebook icon-fb';
+      } else {
+        videoChannel.textContent = data.uploader || 'YouTube';
+        if (platformBadgeIcon) platformBadgeIcon.className = 'fa-brands fa-youtube icon-yt';
+      }
 
       previewCard.classList.remove('hidden');
       resultCard.classList.add('hidden');
@@ -194,10 +504,11 @@ document.addEventListener('DOMContentLoaded', () => {
       previewCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
     } catch (err) {
-      if (err.name === 'AbortError') {
-        showNotification('Quá thời gian kết nối YouTube (45s). Gợi ý: Hãy bấm nút "Tải App Cho PC" phía trên để tải trực tiếp trên máy tính tốc độ 100 MB/s không bị chặn!');
-      } else {
-        showNotification(err.message || 'Lỗi khi kết nối tới máy chủ.');
+      const errMsg = err.message || 'Lỗi khi kết nối tới máy chủ.';
+      const isCookieIssue = errMsg.includes('Cookie') || errMsg.includes('đăng nhập') || errMsg.includes('cannot parse');
+      showNotification(errMsg, false, isCookieIssue);
+      if (errMsg.includes('khóa') || errMsg.includes('hết hạn') || errMsg.includes('bảo trì') || errMsg.includes('Bản quyền')) {
+        checkLicenseStatus(true);
       }
       previewCard.classList.add('hidden');
     } finally {
@@ -213,15 +524,26 @@ document.addEventListener('DOMContentLoaded', () => {
   // Start Extraction / Download
   btnStartDownload.addEventListener('click', async () => {
     if (!currentVideoData || !currentVideoData.url) {
-      showNotification('Vui lòng phân tích đường link trước khi xuất nhạc.');
+      showNotification('Vui lòng phân tích đường link trước khi tải.');
       return;
     }
 
+    const rawFormat = formatSelect.value;
+    let format = 'mp4';
+    let quality = '1080';
+
+    if (rawFormat.startsWith('mp4')) {
+      format = 'mp4';
+      if (rawFormat === 'mp4-1080') quality = '1080';
+      else if (rawFormat === 'mp4-720') quality = '720';
+      else quality = 'best';
+    } else {
+      format = rawFormat;
+      quality = qualitySelect.value || '320';
+    }
+
     const payload = {
-      url: currentVideoData.url,
-      format: formatSelect.value,
-      quality: qualitySelect.value,
-      embed_thumbnail: chkEmbedThumb.checked
+      url: currentVideoData.url, client_id: myClientId, format: format, quality: quality, embed_thumbnail: chkEmbedThumb.checked
     };
 
     btnStartDownload.disabled = true;
@@ -232,7 +554,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateProgressUI({
       percent: 5,
-      status_text: 'Đang khởi động tiến trình trích xuất âm thanh...',
+      status_text: format === 'mp4' ? 'Đang chuẩn bị tải video Full HD 1080p...' : 'Đang khởi động tiến trình trích xuất âm thanh...',
       downloaded_str: '0 KB',
       total_str: 'Đang tính...',
       speed_str: '',
@@ -283,7 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
           clearInterval(pollInterval);
           btnStartDownload.disabled = false;
           progressCard.classList.add('hidden');
-          showNotification('Lỗi xuất nhạc: ' + (task.error || 'Không xác định'));
+          showNotification('Lỗi khi tải: ' + (task.error || 'Không xác định'));
         }
       } catch (err) {
         console.error('Polling error:', err);
@@ -297,7 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
     percentNumber.textContent = Math.floor(percent);
 
     progressStatusText.textContent = task.status_text || 'Đang xử lý...';
-    
+
     if (task.downloaded_str && task.total_str) {
       progressDownloaded.textContent = `${task.downloaded_str} / ${task.total_str}`;
     }
@@ -317,14 +639,33 @@ document.addEventListener('DOMContentLoaded', () => {
     progressCard.classList.add('hidden');
     resultCard.classList.remove('hidden');
 
-    resultFileName.textContent = task.filename || 'bai_hat.mp3';
-    audioPlayer.src = task.stream_url;
-    audioPlayer.load();
+    const isVideo = task.is_video || (task.filename && task.filename.toLowerCase().endsWith('.mp4'));
+    resultFileName.textContent = task.filename || (isVideo ? 'video_fullhd.mp4' : 'bai_hat.mp3');
+
+    if (isVideo) {
+      resultSuccessTitle.textContent = 'Đã tải xong video Full HD 1080p!';
+      resultMediaIcon.className = 'fa-solid fa-film disc-spinning';
+      videoPlayerBox.classList.remove('hidden');
+      audioPlayerBox.classList.add('hidden');
+
+      audioPlayer.pause();
+      videoPlayer.src = task.stream_url;
+      videoPlayer.load();
+    } else {
+      resultSuccessTitle.textContent = 'Đã tạo file nhạc thành công!';
+      resultMediaIcon.className = 'fa-solid fa-compact-disc disc-spinning';
+      audioPlayerBox.classList.remove('hidden');
+      videoPlayerBox.classList.add('hidden');
+
+      videoPlayer.pause();
+      audioPlayer.src = task.stream_url;
+      audioPlayer.load();
+    }
 
     btnDownloadBrowser.href = task.file_url;
     btnDownloadBrowser.setAttribute('download', task.filename);
 
-    // Auto-trigger browser download popup
+    // Auto trigger browser download
     try {
       const a = document.createElement('a');
       a.href = task.file_url;
@@ -339,12 +680,14 @@ document.addEventListener('DOMContentLoaded', () => {
     resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
     // Save to session history
+    const ext = (task.filename.split('.').pop() || 'MP4').toUpperCase();
     saveSessionItem({
       filename: task.filename,
       title: task.title || task.filename,
       file_url: task.file_url,
       stream_url: task.stream_url,
-      format: (task.filename.split('.').pop() || 'MP3').toUpperCase(),
+      is_video: isVideo,
+      format: isVideo ? 'MP4 Full HD' : ext,
       time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
     });
   }
@@ -356,22 +699,30 @@ document.addEventListener('DOMContentLoaded', () => {
     previewCard.classList.add('hidden');
     resultCard.classList.add('hidden');
     progressCard.classList.add('hidden');
-    audioPlayer.pause();
+    if (audioPlayer) audioPlayer.pause();
+    if (videoPlayer) videoPlayer.pause();
     urlInput.focus();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Clear history
+  btnClearHistory.addEventListener('click', () => {
+    if (confirm('Bạn có chắc chắn muốn xóa toàn bộ danh sách vừa tải trong phiên này?')) {
+      clearAllSessionHistory();
+    }
   });
 
   // Render session history
   function renderSessionHistory() {
     const items = getSessionHistory();
-    historyCountBadge.textContent = `${items.length} bài`;
+    historyCountBadge.textContent = `${items.length} mục`;
 
     if (items.length === 0) {
       historyList.innerHTML = `
         <div class="empty-state">
-          <i class="fa-solid fa-music empty-icon"></i>
-          <p>Chưa có bài hát nào được tải trong phiên này.</p>
-          <span>Dán link phía trên để bắt đầu xuất bài hát đầu tiên!</span>
+          <i class="fa-solid fa-film empty-icon"></i>
+          <p>Chưa có video hoặc bài hát nào được tải trong phiên này.</p>
+          <span>Dán link Facebook hoặc YouTube phía trên để bắt đầu tải!</span>
         </div>
       `;
       return;
@@ -379,23 +730,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     historyList.innerHTML = items.map(item => {
       const cleanName = item.title ? item.title.replace(/\.[^/.]+$/, "") : item.filename;
+      const isVid = item.is_video || item.format.includes('MP4');
 
       return `
         <div class="history-item">
           <div class="history-item-left">
-            <div class="audio-icon-pill">
-              <i class="fa-solid fa-headphones"></i>
+            <div class="${isVid ? 'audio-icon-pill video-icon-pill' : 'audio-icon-pill'}">
+              <i class="${isVid ? 'fa-solid fa-film' : 'fa-solid fa-headphones'}"></i>
             </div>
             <div class="history-meta">
               <div class="history-title" title="${item.filename}">${cleanName}</div>
               <div class="history-sub">
-                <span class="tag-format">${item.format}</span>
+                <span class="${isVid ? 'tag-video' : 'tag-format'}">${isVid ? '🎬 ' : '🎵 '}${item.format}</span>
                 <span>Tải lúc: ${item.time}</span>
               </div>
             </div>
           </div>
           <div class="history-actions">
-            <button class="btn-history-play" title="Nghe thử" data-stream="${item.stream_url}" data-name="${encodeURIComponent(item.filename)}">
+            <button class="btn-history-play" title="Xem / Nghe thử" data-stream="${item.stream_url}" data-name="${encodeURIComponent(item.filename)}" data-isvideo="${isVid}">
               <i class="fa-solid fa-play"></i>
             </button>
             <a href="${item.file_url}" download="${item.filename}" class="btn-history-dl" title="Tải lại về máy">
@@ -411,44 +763,36 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.addEventListener('click', () => {
         const streamUrl = btn.getAttribute('data-stream');
         const fileName = decodeURIComponent(btn.getAttribute('data-name'));
+        const isVid = btn.getAttribute('data-isvideo') === 'true';
+
         resultFileName.textContent = fileName;
-        audioPlayer.src = streamUrl;
         resultCard.classList.remove('hidden');
         btnDownloadBrowser.href = `/api/download-file/${encodeURIComponent(fileName)}`;
         btnDownloadBrowser.setAttribute('download', fileName);
-        audioPlayer.play();
+
+        if (isVid) {
+          resultSuccessTitle.textContent = 'Đang phát video đã tải!';
+          resultMediaIcon.className = 'fa-solid fa-film disc-spinning';
+          videoPlayerBox.classList.remove('hidden');
+          audioPlayerBox.classList.add('hidden');
+          audioPlayer.pause();
+          videoPlayer.src = streamUrl;
+          videoPlayer.play();
+        } else {
+          resultSuccessTitle.textContent = 'Đang phát nhạc đã tải!';
+          resultMediaIcon.className = 'fa-solid fa-compact-disc disc-spinning';
+          audioPlayerBox.classList.remove('hidden');
+          videoPlayerBox.classList.add('hidden');
+          videoPlayer.pause();
+          audioPlayer.src = streamUrl;
+          audioPlayer.play();
+        }
+
         resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       });
     });
   }
 
-  btnClearHistory.addEventListener('click', () => {
-    if (confirm('Bạn có muốn xóa danh sách các bài vừa tải trong phiên này không?')) {
-      clearAllSessionHistory();
-    }
-  });
-
-  
-  // Check tunnel connection status
-  async function checkTunnelStatus() {
-    try {
-      const res = await fetch('/api/tunnel-status');
-      const data = await res.json();
-      const badge = document.getElementById('systemStatusBadge');
-      if (badge) {
-        if (data.is_connected) {
-          badge.innerHTML = '<span class="dot" style="background:#10b981;box-shadow:0 0 10px #10b981;"></span> Tải Nhạc Siêu Tốc';
-          badge.title = 'Tải Nhạc Siêu Tốc - Tải được 100% video dài, mix, playlist không giới hạn!';
-        } else {
-          badge.innerHTML = '<span class="dot"></span> Tải Nhạc Siêu Tốc';
-        }
-      }
-    } catch (e) {}
-  }
-  checkTunnelStatus();
-  setInterval(checkTunnelStatus, 10000);
-
-  // Initial load
+  // Initial render of history
   renderSessionHistory();
-
 });

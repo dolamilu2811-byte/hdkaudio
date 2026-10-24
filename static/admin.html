@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HDK MEDIA - BẢNG ĐIỀU KHIỂN QUẢN TRỊ ADMIN</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/static/admin.css?v=1.0">
+</head>
+<body>
+  <!-- Background Ambient Lights -->
+  <div class="bg-orb orb-purple"></div>
+  <div class="bg-orb orb-cyan"></div>
+  <div class="bg-grid"></div>
+
+  <!-- Login Modal / Screen -->
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-box glass-panel">
+      <div class="login-header">
+        <div class="shield-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <h2>HDK MEDIA ADMIN</h2>
+        <p>Bảng điều khiển máy chủ & Bản quyền từ xa</p>
+      </div>
+      <form id="loginForm" class="login-form">
+        <div class="input-group">
+          <label for="adminPass"><i class="fa-solid fa-key"></i> Mật khẩu Quản trị</label>
+          <div class="pass-wrapper">
+            <input type="password" id="adminPass" placeholder="Nhập mật khẩu Admin..." autocomplete="current-password" required>
+            <button type="button" id="btnTogglePass" class="btn-eye"><i class="fa-solid fa-eye"></i></button>
+          </div>
+        </div>
+        <div id="loginMsg" class="login-msg hidden"></div>
+        <button type="submit" id="btnLogin" class="btn-submit">
+          <span><i class="fa-solid fa-right-to-bracket"></i> ĐĂNG NHẬP HỆ THỐNG</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Admin Dashboard -->
+  <div id="adminApp" class="admin-container hidden">
+    <!-- Top Header -->
+    <header class="admin-header glass-panel">
+      <div class="header-left">
+        <div class="brand-badge">
+          <i class="fa-solid fa-server"></i>
+          <div>
+            <h1>HDK <span>ADMIN</span></h1>
+            <span class="sub-text">Máy chủ Cloud 24/24</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Master Switch Control -->
+      <div class="header-center">
+        <div class="master-switch-card">
+          <div class="switch-info">
+            <span class="switch-title">CÔNG TẮC HỆ THỐNG</span>
+            <span id="masterStatusText" class="switch-state active">ĐANG CHO PHÉP TẢI</span>
+          </div>
+          <label class="toggle-slider">
+            <input type="checkbox" id="masterSwitchToggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button id="btnRefreshData" class="btn-icon" title="Làm mới dữ liệu"><i class="fa-solid fa-rotate"></i></button>
+        <button id="btnLogout" class="btn-logout" title="Đăng xuất"><i class="fa-solid fa-arrow-right-from-bracket"></i> <span>Thoát</span></button>
+      </div>
+    </header>
+
+    <!-- Stat Summary Bar -->
+    <section class="stats-grid">
+      <div class="stat-card glass-panel stat-online">
+        <div class="stat-icon"><i class="fa-solid fa-signal"></i></div>
+        <div class="stat-meta">
+          <span class="stat-label">Trạng thái Web</span>
+          <h3 id="statSystemState">BẬT (Online)</h3>
+        </div>
+      </div>
+
+      <div class="stat-card glass-panel stat-clients">
+        <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+        <div class="stat-meta">
+          <span class="stat-label">Tổng khách hàng</span>
+          <h3 id="statTotalClients">0</h3>
+        </div>
+      </div>
+
+      <div class="stat-card glass-panel stat-active">
+        <div class="stat-icon"><i class="fa-solid fa-user-check"></i></div>
+        <div class="stat-meta">
+          <span class="stat-label">Đang hoạt động</span>
+          <h3 id="statActiveClients">0</h3>
+        </div>
+      </div>
+
+      <div class="stat-card glass-panel stat-expired">
+        <div class="stat-icon"><i class="fa-solid fa-user-clock"></i></div>
+        <div class="stat-meta">
+          <span class="stat-label">Đã hết hạn / Khóa</span>
+          <h3 id="statExpiredClients">0</h3>
+        </div>
+      </div>
+
+      <div class="stat-card glass-panel stat-dl">
+        <div class="stat-icon"><i class="fa-solid fa-cloud-arrow-down"></i></div>
+        <div class="stat-meta">
+          <span class="stat-label">Tổng lượt tải video</span>
+          <h3 id="statTotalDownloads">0</h3>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="admin-tabs">
+      <button class="tab-btn active" data-tab="tabClients">
+        <i class="fa-solid fa-users-gear"></i> Quản lý Khách hàng (<span id="tabCountClients">0</span>)
+      </button>
+      <button class="tab-btn" data-tab="tabKeys">
+        <i class="fa-solid fa-key"></i> Tạo Mã Kích Hoạt (<span id="tabCountKeys">0</span>)
+      </button>
+      <button class="tab-btn" data-tab="tabSettings">
+        <i class="fa-solid fa-sliders"></i> Cài đặt & Mật khẩu
+      </button>
+    </nav>
+
+    <!-- Tab 1: Clients Management -->
+    <main id="tabClients" class="tab-content active">
+      <div class="content-toolbar glass-panel">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="clientSearchInput" placeholder="Tìm theo tên, ID thiết bị, IP...">
+        </div>
+        <div class="filter-group">
+          <button class="filter-btn active" data-filter="all">Tất cả</button>
+          <button class="filter-btn" data-filter="active">Đang hoạt động</button>
+          <button class="filter-btn" data-filter="expired">Hết hạn</button>
+          <button class="filter-btn" data-filter="blocked">Bị khóa</button>
+        </div>
+      </div>
+
+      <!-- Clients List Table / Cards -->
+      <div class="clients-container glass-panel">
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Khách hàng & Thiết bị</th>
+                <th>Thời gian sử dụng</th>
+                <th>Trạng thái</th>
+                <th>Lượt tải</th>
+                <th>Lần cuối dùng</th>
+                <th class="text-right">Gia hạn & Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="clientsTableBody">
+              <tr>
+                <td colspan="6" class="text-center loading-cell">
+                  <i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu khách hàng...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <!-- Tab 2: License Key Generator -->
+    <main id="tabKeys" class="tab-content">
+      <div class="keys-grid">
+        <!-- Generator Form -->
+        <div class="glass-panel key-generator-card">
+          <div class="panel-header">
+            <h3><i class="fa-solid fa-wand-magic-sparkles"></i> Tạo Mã Kích Hoạt Mới</h3>
+            <p>Sinh mã gửi cho khách qua Zalo/FB để khách tự nhập gia hạn</p>
+          </div>
+          <div class="generator-form">
+            <div class="form-group">
+              <label>Chọn gói thời hạn gia hạn:</label>
+              <div class="plan-options">
+                <label class="plan-radio">
+                  <input type="radio" name="keyDays" value="7" checked>
+                  <span class="plan-card">
+                    <span class="plan-name">1 Tuần</span>
+                    <span class="plan-desc">+7 Ngày dùng</span>
+                  </span>
+                </label>
+                <label class="plan-radio">
+                  <input type="radio" name="keyDays" value="30">
+                  <span class="plan-card">
+                    <span class="plan-name">1 Tháng</span>
+                    <span class="plan-desc">+30 Ngày dùng</span>
+                  </span>
+                </label>
+                <label class="plan-radio">
+                  <input type="radio" name="keyDays" value="365">
+                  <span class="plan-card">
+                    <span class="plan-name">1 Năm</span>
+                    <span class="plan-desc">+365 Ngày</span>
+                  </span>
+                </label>
+                <label class="plan-radio">
+                  <input type="radio" name="keyDays" value="-1">
+                  <span class="plan-card">
+                    <span class="plan-name">Vĩnh Viễn</span>
+                    <span class="plan-desc">Trọn đời VIP</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="keyNote">Ghi chú người nhận (tùy chọn):</label>
+              <input type="text" id="keyNote" placeholder="Ví dụ: Gửi anh Nam Zalo 098xxx">
+            </div>
+
+            <button id="btnCreateKey" class="btn-create-key">
+              <i class="fa-solid fa-plus-circle"></i> TẠO MÃ KÍCH HOẠT NGAY
+            </button>
+
+            <div id="newKeyResultBox" class="new-key-result hidden">
+              <div class="new-key-badge">MÃ VỪA TẠO THÀNH CÔNG:</div>
+              <div class="key-display-row">
+                <span id="displayNewKeyCode" class="key-code-text">HDK-30D-XXXX</span>
+                <button id="btnCopyNewKey" class="btn-copy-sm"><i class="fa-solid fa-copy"></i> Sao chép</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Keys List -->
+        <div class="glass-panel keys-list-card">
+          <div class="panel-header">
+            <h3><i class="fa-solid fa-list-check"></i> Danh Sách Mã Đã Tạo</h3>
+            <span class="sub-header-count" id="keysCountBadge">0 mã</span>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Mã kích hoạt</th>
+                  <th>Gói</th>
+                  <th>Ghi chú</th>
+                  <th>Tình trạng</th>
+                  <th>Người dùng</th>
+                </tr>
+              </thead>
+              <tbody id="keysTableBody">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Tab 3: Settings & Password -->
+    <main id="tabSettings" class="tab-content">
+      <div class="settings-grid">
+        <!-- Change Password Card -->
+        <div class="glass-panel setting-card">
+          <div class="panel-header">
+            <h3><i class="fa-solid fa-lock"></i> Đổi Mật Khẩu Admin</h3>
+            <p>Đổi mật khẩu truy cập trang quản trị này</p>
+          </div>
+          <form id="changePassForm" class="setting-form">
+            <div class="form-group">
+              <label for="newPass">Mật khẩu mới:</label>
+              <input type="password" id="newPass" placeholder="Nhập mật khẩu mới..." required>
+            </div>
+            <div class="form-group">
+              <label for="confirmPass">Nhập lại mật khẩu mới:</label>
+              <input type="password" id="confirmPass" placeholder="Xác nhận mật khẩu..." required>
+            </div>
+            <div id="changePassMsg" class="login-msg hidden"></div>
+            <button type="submit" class="btn-save-setting"><i class="fa-solid fa-floppy-disk"></i> Lưu Mật Khẩu Mới</button>
+          </form>
+        </div>
+
+        <!-- System Parameters Card -->
+        <div class="glass-panel setting-card">
+          <div class="panel-header">
+            <h3><i class="fa-solid fa-gears"></i> Cấu Hình Mặc Định</h3>
+            <p>Thiết lập thời gian dùng thử và thông tin liên hệ</p>
+          </div>
+          <form id="systemConfigForm" class="setting-form">
+            <div class="form-group">
+              <label for="cfgTrialDays">Số ngày dùng thử cho khách mới:</label>
+              <input type="number" id="cfgTrialDays" min="0" max="30" value="1">
+              <small class="helper-text">Khách vào lần đầu sẽ được dùng miễn phí số ngày này (Mặc định: 1 ngày).</small>
+            </div>
+            <div class="form-group">
+              <label for="cfgContact">Số điện thoại / Zalo liên hệ của Admin:</label>
+              <input type="text" id="cfgContact" value="037.2222.700">
+            </div>
+            <div class="form-group">
+              <label for="cfgBroadcast">Thông báo khi bạn TẮT công tắc:</label>
+              <textarea id="cfgBroadcast" rows="3"></textarea>
+            </div>
+            <div id="configMsg" class="login-msg hidden"></div>
+            <button type="submit" class="btn-save-setting"><i class="fa-solid fa-check"></i> Cập Nhật Cấu Hình</button>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toastBox" class="toast-box hidden">
+    <i id="toastIcon" class="fa-solid fa-circle-check"></i>
+    <span id="toastMsg">Thành công!</span>
+  </div>
+
+  <script src="/static/admin.js?v=1.0"></script>
+</body>
+</html>

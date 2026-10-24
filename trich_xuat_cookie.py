@@ -72,18 +72,22 @@ def extract_cookies():
     cursor.execute("""
         SELECT host_key, path, is_secure, expires_utc, name, value, encrypted_value
         FROM cookies
-        WHERE host_key LIKE '%youtube.com%' OR host_key LIKE '%google.com%'
+        WHERE host_key LIKE '%youtube.com%' 
+           OR host_key LIKE '%google.com%'
+           OR host_key LIKE '%facebook.com%'
+           OR host_key LIKE '%fbcdn.net%'
     """)
     rows = cursor.fetchall()
 
     aes = AESGCM(decrypted_key)
     output_lines = [
         "# Netscape HTTP Cookie File",
-        "# Exported automatically from CocCoc for HDK AUDIO",
+        "# Exported automatically from CocCoc for HDK AUDIO & VIDEO",
         ""
     ]
 
-    has_login = False
+    has_yt_login = False
+    has_fb_login = False
     count = 0
 
     for host_key, path, is_secure, expires_utc, name, value, enc_val in rows:
@@ -100,7 +104,9 @@ def extract_cookies():
             continue
 
         if name in ['SID', 'HSID', 'SSID', 'LOGIN_INFO', 'SAPISID']:
-            has_login = True
+            has_yt_login = True
+        if name in ['c_user', 'xs']:
+            has_fb_login = True
 
         subdomain = "TRUE" if host_key.startswith('.') else "FALSE"
         secure = "TRUE" if is_secure else "FALSE"
@@ -122,11 +128,11 @@ def extract_cookies():
     with open(out_file, 'w', encoding='utf-8') as f:
         f.write("\n".join(output_lines) + "\n")
 
-    print(f"[OK] Da trich xuat thanh cong {count} cookie YouTube/Google tu Coc Coc!")
-    if has_login:
-        print("[XAC NHAN] Da tim thay phien dang nhap tai khoan (SID/LOGIN_INFO)!")
-    else:
-        print("[LUU Y] Chua thay cookie tai khoan. Hay dam bao ban da dang nhap YouTube tren Coc Coc.")
+    print(f"[OK] Da trich xuat thanh cong {count} cookie (YouTube, Google, Facebook) tu Coc Coc!")
+    if has_yt_login:
+        print("[XAC NHAN] Da tim thay phien dang nhap YouTube!")
+    if has_fb_login:
+        print("[XAC NHAN] Da tim thay phien dang nhap Facebook (c_user/xs)!")
     return True
 
 if __name__ == "__main__":

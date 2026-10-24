@@ -1,0 +1,9 @@
+{
+  "master_switch": true,
+  "admin_password": "HDK@admin2026",
+  "trial_days": 1,
+  "admin_contact": "037.2222.700",
+  "broadcast_message": "Hệ thống đang tạm khóa hoặc bảo trì bởi Quản trị viên. Vui lòng liên hệ Admin qua SĐT/Zalo: 037.2222.700",
+  "total_downloads": 0,
+  "secret_token_seed": "5288656c7bc893083260683977a63813"
+}
