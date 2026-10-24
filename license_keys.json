@@ -1,1 +1,11 @@
-{}
+{
+  "HDK-30D-B7CA38": {
+    "key": "HDK-30D-B7CA38",
+    "days": 30,
+    "note": "",
+    "created_at": 1792812291,
+    "used": false,
+    "used_by": null,
+    "used_at": null
+  }
+}

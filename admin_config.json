@@ -3,7 +3,7 @@
   "admin_password": "milu2811",
   "trial_days": 3,
   "admin_contact": "037.2222.700",
-  "broadcast_message": "Hệ thống đang tạm khóa hoặc bảo trì bởi Quản trị viên. Vui lòng liên hệ Admin qua SĐT/Zalo: 037.2222.700",
+  "broadcast_message": "Hệ thống đang tạm khóa hoặc bảo trì . Vui lòng liên hệ Admin qua SĐT/Zalo: 037.2222.700",
   "total_downloads": 0,
   "secret_token_seed": "5288656c7bc893083260683977a63813"
 }

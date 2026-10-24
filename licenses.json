@@ -1,1 +1,14 @@
-{}
+{
+  "HDK-DREQUB642M": {
+    "client_id": "HDK-DREQUB642M",
+    "name": "Khách mới (UB642M)",
+    "ip": "42.117.134.7",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "created_at": 1792812439,
+    "expires_at": 1792898839,
+    "status": "active",
+    "is_lifetime": false,
+    "download_count": 0,
+    "last_active": 1792812439
+  }
+}

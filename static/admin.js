@@ -720,4 +720,15 @@ document.addEventListener('DOMContentLoaded', () => {
     loginOverlay.classList.remove('hidden');
     adminApp.classList.add('hidden');
   }
+
+  // Realtime Auto-Polling: Updates clients and stats every 4 seconds automatically
+  setInterval(() => {
+    if (adminToken && !adminApp.classList.contains('hidden')) {
+      // Skip refresh while user is actively typing in an inline edit box
+      if (!document.querySelector('.inline-edit-input')) {
+        loadDashboard();
+      }
+    }
+  }, 4000);
+
 });

@@ -164,6 +164,34 @@ def get_admin_token_from_req():
         return auth_header.split(" ", 1)[1].strip()
     return None
 
+
+def forward_admin_to_cloud(endpoint, payload):
+    if not IS_CLOUD_SERVER and CLOUD_SERVER_URL:
+        def do_forward():
+            try:
+                import urllib.request
+                pwd = license_mgr.config.get("admin_password")
+                l_data = json.dumps({"password": pwd}).encode("utf-8")
+                l_req = urllib.request.Request(
+                    f"{CLOUD_SERVER_URL}/api/admin/login",
+                    data=l_data,
+                    headers={"Content-Type": "application/json"}
+                )
+                with urllib.request.urlopen(l_req, timeout=5) as l_resp:
+                    token = json.loads(l_resp.read().decode("utf-8")).get("token")
+                    if token:
+                        f_data = json.dumps(payload).encode("utf-8")
+                        f_req = urllib.request.Request(
+                            f"{CLOUD_SERVER_URL}{endpoint}",
+                            data=f_data,
+                            headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
+                        )
+                        urllib.request.urlopen(f_req, timeout=5)
+                        print(f"[SYNC] Da dong bo {endpoint} len Render Cloud!", flush=True)
+            except Exception as e_fwd:
+                print(f"[SYNC FORWARD ERROR {endpoint}]: {e_fwd}", flush=True)
+        threading.Thread(target=do_forward, daemon=True).start()
+
 def check_admin_auth():
     token = get_admin_token_from_req()
     if not token or not license_mgr.check_admin_session(token):
@@ -187,6 +215,48 @@ def admin_login():
 def admin_dashboard_data():
     if not check_admin_auth():
         return jsonify({"error": "Unauthorized"}), 401
+
+    # Neu dang mo o Localhost, tu dong dong bo lay toan bo khach hang moi nhat tu Render Cloud ve!
+    if not IS_CLOUD_SERVER and CLOUD_SERVER_URL:
+        try:
+            import urllib.request
+            pwd = license_mgr.config.get("admin_password")
+            l_data = json.dumps({"password": pwd}).encode("utf-8")
+            l_req = urllib.request.Request(
+                f"{CLOUD_SERVER_URL}/api/admin/login",
+                data=l_data,
+                headers={"Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(l_req, timeout=5) as l_resp:
+                token = json.loads(l_resp.read().decode("utf-8")).get("token")
+                if token:
+                    d_req = urllib.request.Request(
+                        f"{CLOUD_SERVER_URL}/api/admin/dashboard-data",
+                        headers={"Authorization": f"Bearer {token}"}
+                    )
+                    with urllib.request.urlopen(d_req, timeout=5) as d_resp:
+                        cloud_data = json.loads(d_resp.read().decode("utf-8"))
+                        # Update local license_mgr with cloud clients
+                        for c in cloud_data.get("clients", []):
+                            cid = c.get("client_id")
+                            if cid and cid not in license_mgr.licenses:
+                                license_mgr.licenses[cid] = {
+                                    "client_id": cid,
+                                    "name": c.get("name", "Khách"),
+                                    "ip": c.get("ip", ""),
+                                    "user_agent": c.get("user_agent", ""),
+                                    "created_at": int(time.time()),
+                                    "expires_at": int(time.time()) + 86400,
+                                    "status": c.get("status", "active"),
+                                    "is_lifetime": c.get("is_lifetime", False),
+                                    "download_count": c.get("download_count", 0),
+                                    "last_active": int(time.time())
+                                }
+                        license_mgr.save_all()
+                        return jsonify(cloud_data)
+        except Exception as e_cloud_dash:
+            print(f"[CLOUD DASHBOARD SYNC ERROR]: {e_cloud_dash}", flush=True)
+
     return jsonify(license_mgr.get_dashboard_data())
 
 @app.route("/api/admin/system-toggle", methods=["POST"])
@@ -246,6 +316,7 @@ def admin_update_client():
     client_id = data.get("client_id", "").strip()
     name = data.get("name", "").strip()
     ok, msg = license_mgr.update_client_name(client_id, name)
+    forward_admin_to_cloud("/api/admin/client/update", {"client_id": client_id, "name": name})
     if ok:
         return jsonify({"status": "ok", "message": msg})
     return jsonify({"error": msg}), 400
@@ -259,6 +330,7 @@ def admin_extend_client():
     days = data.get("days", 7)
     lifetime = data.get("lifetime", False)
     ok, msg = license_mgr.extend_client(client_id, days, lifetime)
+    forward_admin_to_cloud("/api/admin/client/extend", {"client_id": client_id, "days": days, "lifetime": lifetime})
     if ok:
         return jsonify({"status": "ok", "message": msg})
     return jsonify({"error": msg}), 400
@@ -271,6 +343,7 @@ def admin_client_status():
     client_id = data.get("client_id", "").strip()
     status = data.get("status", "active").strip()
     ok, msg = license_mgr.set_client_status(client_id, status)
+    forward_admin_to_cloud("/api/admin/client/status", {"client_id": client_id, "status": status})
     if ok:
         return jsonify({"status": "ok", "message": msg})
     return jsonify({"error": msg}), 400
@@ -282,6 +355,7 @@ def admin_delete_client():
     data = request.get_json() or {}
     client_id = data.get("client_id", "").strip()
     ok, msg = license_mgr.delete_client(client_id)
+    forward_admin_to_cloud("/api/admin/client/delete", {"client_id": client_id})
     if ok:
         return jsonify({"status": "ok", "message": msg})
     return jsonify({"error": msg}), 400
