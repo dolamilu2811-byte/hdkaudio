@@ -279,22 +279,23 @@ class LicenseManager:
         return False, "Không tìm thấy khách hàng!"
 
     # ------------------ LICENSE KEY ACTIVATION SYSTEM ------------------
-    def generate_license_key(self, days, note=""):
+    def generate_license_key(self, days, note="", exact_key=None):
         now = int(time.time())
-        rand_suffix = secrets.token_hex(3).upper()
-
-        if days == 7:
-            prefix = "HDK-7D"
-        elif days == 30:
-            prefix = "HDK-30D"
-        elif days == 365:
-            prefix = "HDK-1Y"
-        elif days == -1:
-            prefix = "HDK-VIP"
+        if exact_key:
+            key_code = exact_key.strip().upper()
         else:
-            prefix = f"HDK-{days}D"
-
-        key_code = f"{prefix}-{rand_suffix}"
+            rand_suffix = secrets.token_hex(3).upper()
+            if days == 7:
+                prefix = "HDK-7D"
+            elif days == 30:
+                prefix = "HDK-30D"
+            elif days == 365:
+                prefix = "HDK-1Y"
+            elif days == -1:
+                prefix = "HDK-VIP"
+            else:
+                prefix = f"HDK-{days}D"
+            key_code = f"{prefix}-{rand_suffix}"
         self.keys[key_code] = {
             "key": key_code,
             "days": days,

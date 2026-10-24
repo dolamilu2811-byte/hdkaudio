@@ -293,7 +293,37 @@ def admin_create_key():
     data = request.get_json() or {}
     days = int(data.get("days", 7))
     note = data.get("note", "").strip()
-    key_code = license_mgr.generate_license_key(days, note)
+    exact_key = data.get("exact_key", "").strip()
+    key_code = license_mgr.generate_license_key(days, note, exact_key=exact_key or None)
+
+    # Tu dong dong bo ma key sang Render neu tao o Localhost
+    if not IS_CLOUD_SERVER and CLOUD_SERVER_URL and not exact_key:
+        def sync_key_to_cloud():
+            try:
+                import urllib.request
+                pwd = license_mgr.config.get("admin_password")
+                l_data = json.dumps({"password": pwd}).encode("utf-8")
+                l_req = urllib.request.Request(
+                    f"{CLOUD_SERVER_URL}/api/admin/login",
+                    data=l_data,
+                    headers={"Content-Type": "application/json"}
+                )
+                with urllib.request.urlopen(l_req, timeout=5) as l_resp:
+                    token = json.loads(l_resp.read().decode("utf-8")).get("token")
+                    if token:
+                        k_data = json.dumps({"days": days, "note": note, "exact_key": key_code}).encode("utf-8")
+                        k_req = urllib.request.Request(
+                            f"{CLOUD_SERVER_URL}/api/admin/keys/create",
+                            data=k_data,
+                            headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
+                        )
+                        urllib.request.urlopen(k_req, timeout=5)
+                        print(f"[SYNC] Da dong bo ma key {key_code} len Render Cloud!", flush=True)
+            except Exception as e:
+                print(f"[SYNC KEY ERROR]: {e}", flush=True)
+
+        threading.Thread(target=sync_key_to_cloud, daemon=True).start()
+
     return jsonify({"status": "ok", "key": key_code})
 
 @app.route("/api/admin/keys/delete", methods=["POST"])
