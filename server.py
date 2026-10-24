@@ -36,7 +36,7 @@ if os.path.exists(BIN_DIR):
     os.environ["PATH"] = BIN_DIR + os.pathsep + os.environ.get("PATH", "")
 
 import yt_dlp
-from license_manager import license_mgr
+from license_manager import license_mgr, CLOUD_SERVER_URL, IS_CLOUD_SERVER
 
 TASKS = {}
 
@@ -196,6 +196,35 @@ def admin_system_toggle():
     data = request.get_json() or {}
     new_state = data.get("master_switch", True)
     saved = license_mgr.set_master_switch(new_state)
+
+    # Tu dong dong bo sang Cloud Server Render neu dang thao tac o localhost
+    if not IS_CLOUD_SERVER and CLOUD_SERVER_URL:
+        def sync_to_cloud():
+            try:
+                import urllib.request
+                pwd = license_mgr.config.get("admin_password")
+                l_data = json.dumps({"password": pwd}).encode("utf-8")
+                l_req = urllib.request.Request(
+                    f"{CLOUD_SERVER_URL}/api/admin/login",
+                    data=l_data,
+                    headers={"Content-Type": "application/json"}
+                )
+                with urllib.request.urlopen(l_req, timeout=5) as l_resp:
+                    token = json.loads(l_resp.read().decode("utf-8")).get("token")
+                    if token:
+                        t_data = json.dumps({"master_switch": new_state}).encode("utf-8")
+                        t_req = urllib.request.Request(
+                            f"{CLOUD_SERVER_URL}/api/admin/system-toggle",
+                            data=t_data,
+                            headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
+                        )
+                        urllib.request.urlopen(t_req, timeout=5)
+                        print(f"[SYNC] Da dong bo cong tac ({new_state}) len Render thanh cong!", flush=True)
+            except Exception as e_sync:
+                print(f"[SYNC ERROR]: {e_sync}", flush=True)
+
+        threading.Thread(target=sync_to_cloud, daemon=True).start()
+
     return jsonify({"status": "ok", "master_switch": saved})
 
 @app.route("/api/admin/change-password", methods=["POST"])
